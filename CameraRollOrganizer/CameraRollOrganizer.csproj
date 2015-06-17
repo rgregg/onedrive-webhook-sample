@@ -57,8 +57,8 @@
     <Reference Include="Microsoft.WindowsAzure.Storage">
       <HintPath>..\packages\WindowsAzure.Storage.4.3.0\lib\net40\Microsoft.WindowsAzure.Storage.dll</HintPath>
     </Reference>
-    <Reference Include="OneDriveGeneratedSdk">
-      <HintPath>..\..\vroom-csharp-client\OneDriveSdk\bin\Debug\OneDriveGeneratedSdk.dll</HintPath>
+    <Reference Include="OneDriveSdk">
+      <HintPath>..\..\vroom-csharp-client\OneDriveSdk\bin\Debug\OneDriveSdk.dll</HintPath>
     </Reference>
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Spatial, Version=5.6.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
@@ -103,6 +103,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App_Start\WebApiConfig.cs" />
+    <Compile Include="Controllers\AuthorizationController.cs" />
     <Compile Include="Controllers\WebhookController.cs" />
     <Compile Include="default.aspx.cs">
       <DependentUpon>default.aspx</DependentUpon>
@@ -126,6 +127,9 @@
     <Compile Include="redirect.ashx.cs">
       <DependentUpon>redirect.ashx</DependentUpon>
     </Compile>
+    <Compile Include="Utility\Config.cs" />
+    <Compile Include="Utility\JsonResultEx.cs" />
+    <Compile Include="Utility\OAuthHelper.cs" />
     <Compile Include="Utility\QueryStringBuilder.cs" />
   </ItemGroup>
   <ItemGroup>

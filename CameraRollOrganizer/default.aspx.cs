@@ -12,20 +12,13 @@ namespace CameraRollOrganizer
     {
         protected void Page_Load(object sender, EventArgs e)
         {
-            var clientId = ConfigurationManager.AppSettings["MsaClientId"];
 
             Utility.QueryStringBuilder qsb = new Utility.QueryStringBuilder();
-            qsb.Add("client_id", clientId);
-            qsb.Add("scope", "wl.offline_access onedrive.readwrite");
+            qsb.Add("client_id", Utility.Config.MsaClientId);
+            qsb.Add("scope", Utility.Config.MsaClientScopes);
             qsb.Add("response_type", "code");
-            qsb.Add("redirect_uri", "");
-
-            string relativeUrl = Page.ResolveUrl("~/redirect.ashx");
-            var redirectUri = new Uri(HttpContext.Current.Request.Url, relativeUrl);
-            qsb.Add("redirect_uri", redirectUri.AbsoluteUri);
-            qsb.StartCharacter = '?';
-
-            linkToSignIn.NavigateUrl = "https://login.live.com/oauth20_authorize.srf" + qsb.ToString();
+            qsb.Add("redirect_uri", Utility.Config.MsaRedirectionTarget);
+            linkToSignIn.NavigateUrl = Utility.Config.MsaAuthorizationService + qsb.ToString();
         }
     }
 }

@@ -13,6 +13,11 @@ namespace CameraRollOrganizer
 
         public void ProcessRequest(HttpContext context)
         {
+            var authorizationCode = context.Request.QueryString["code"];
+            if (string.IsNullOrEmpty(authorizationCode))
+                
+
+            
             context.Response.ContentType = "text/plain";
             context.Response.Write("Hello World");
         }

@@ -11,7 +11,7 @@ namespace CameraRollOrganizer.Utility
         private readonly Dictionary<string, string> parameters = new Dictionary<string, string>();
         public QueryStringBuilder()
         {
-            StartCharacter = null;
+            StartCharacter = '?';
             SeperatorCharacter = '&';
             KeyValueJoinCharacter = '=';
         }
