@@ -80,6 +80,16 @@ namespace CameraRollOrganizer.Models
 
             throw new InvalidOperationException("Unable to authenticate. Need to sign-in again.");
         }
+
+        #region Properties that are in IAuthenticator that shouldn't be
+        public string[] Scopes { get; set; }
+
+        public DateTimeOffset? Expiration { get; set; }
+
+        public string ClientId { get; set; }
+
+        public string AccessToken { get; set; }
+        #endregion
     }
 
     
