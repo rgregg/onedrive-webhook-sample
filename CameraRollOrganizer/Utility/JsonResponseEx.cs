@@ -12,24 +12,22 @@ using System.Web.Http;
 
 namespace CameraRollOrganizer.Utility
 {
-
-    internal static class JsonResultExtensionMethods
-    {
-        public static IHttpActionResult JsonResponse<T>(this ApiController controller, HttpStatusCode statusCode, T body)
-        {
-            return new JsonResultEx(statusCode, body);
-        }
-    }
-
-    internal class JsonResultEx : IHttpActionResult
+    internal class JsonResponseEx : IHttpActionResult
     {
         private readonly HttpStatusCode _statusCode;
         private readonly object _bodyObject;
+        private readonly CookieHeaderValue _cookie;
 
-        public JsonResultEx(HttpStatusCode statusCode, object body)
+        public static IHttpActionResult Create(HttpStatusCode statusCode, object body, CookieHeaderValue cookie = null)
+        {
+            return new JsonResponseEx(statusCode, body, cookie);
+        }
+
+        public JsonResponseEx(HttpStatusCode statusCode, object body, CookieHeaderValue cookie = null)
         {
             _statusCode = statusCode;
             _bodyObject = body;
+            _cookie = cookie;
         }
 
         public Task<HttpResponseMessage> ExecuteAsync(CancellationToken cancellationToken)
@@ -37,10 +35,13 @@ namespace CameraRollOrganizer.Utility
             var response = new HttpResponseMessage(_statusCode);
             response.Content = new StringContent(JsonConvert.SerializeObject(_bodyObject));
             response.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+
+            if (null != _cookie)
+            {
+                response.Headers.AddCookies(new CookieHeaderValue[] { _cookie });
+            }
+
             return Task.FromResult(response);
         }
-    
-        
-
     }
 }

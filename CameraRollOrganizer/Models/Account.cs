@@ -45,7 +45,12 @@ namespace CameraRollOrganizer.Models
 
         public string SubfolderFormat { get; set; }
 
-        
+        public long PhotosOrganized { get; set; }
+
+        public long WebhooksReceived { get; set; }
+
+
+
         private string CachedAccessToken { get; set; }
 
         private DateTimeOffset? CachedAccessTokenExpiration { get; set; }
@@ -88,7 +93,10 @@ namespace CameraRollOrganizer.Models
 
         public string ClientId { get; set; }
 
-        public string AccessToken { get; set; }
+        public string AccessToken { 
+            get { return CachedAccessToken; }
+            set { CachedAccessToken = value; } 
+        }
         #endregion
     }
 

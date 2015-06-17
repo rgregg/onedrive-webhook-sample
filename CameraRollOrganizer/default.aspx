@@ -1,4 +1,4 @@
-﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="default.aspx.cs" Inherits="CameraRollOrganizer._default" %>
+﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="default.aspx.cs" Async="true" Inherits="CameraRollOrganizer._default" %>
 
 <!DOCTYPE html>
 
@@ -11,10 +11,21 @@
     <div>
         <h1>OneDrive Camera Roll Organizer</h1>
 
-        <p>Sign in to your OneDrive to enable automatic camera roll organization. This sample application
-        uses Webhooks and OneDrive API.</p>
+        <asp:Panel runat="server" ID="panelNoCurrentUser">
+            <p>Sign in to your OneDrive to enable automatic camera roll organization. This sample application
+            uses Webhooks and OneDrive API.</p>
 
-        <p><asp:HyperLink runat="server" ID="linkToSignIn">Sign in to OneDrive</asp:HyperLink></p>
+            <p><asp:HyperLink runat="server" ID="linkToSignIn">Sign in to OneDrive</asp:HyperLink></p>
+        </asp:Panel>
+
+        <asp:Panel runat="server" ID="panelLoggedIn" Visible="false">
+            <p>Account owner: <asp:Label runat="server" ID="labelAccountDisplayName"></asp:Label></p>
+            <p>ID: <asp:Label runat="server" ID="labelAccountId"></asp:Label></p>
+            <p>Photos organized: <asp:Label runat="server" ID="labelPhotosOrganizedCount"></asp:Label></p>
+            <p>Webhooks Received: <asp:Label runat="server" ID="labelWebhooksReceived"></asp:Label></p>
+
+            <p><a href="/signout">Sign Out</a></p>
+        </asp:Panel>
     </div>
     </form>
 </body>

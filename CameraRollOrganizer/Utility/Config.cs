@@ -49,5 +49,10 @@ namespace CameraRollOrganizer.Utility
             return new OAuthHelper(Config.MsaTokenService, Config.MsaClientId, Config.MsaClientSecret, Config.MsaRedirectionTarget);
         }
 
+        public static string CookiePassword
+        {
+            get { return ConfigurationManager.AppSettings["CookiePassword"]; }
+        }
+
     }
 }

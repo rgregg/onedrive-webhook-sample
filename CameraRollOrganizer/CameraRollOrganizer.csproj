@@ -116,6 +116,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App_Start\WebApiConfig.cs" />
+    <Compile Include="Controllers\ActionController.cs" />
     <Compile Include="Controllers\AuthorizationController.cs" />
     <Compile Include="Controllers\WebhookController.cs" />
     <Compile Include="default.aspx.cs">
@@ -138,7 +139,8 @@
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
     <Compile Include="Utility\Config.cs" />
-    <Compile Include="Utility\JsonResultEx.cs" />
+    <Compile Include="Utility\Cryptography.cs" />
+    <Compile Include="Utility\JsonResponseEx.cs" />
     <Compile Include="Utility\OAuthHelper.cs" />
     <Compile Include="Utility\QueryStringBuilder.cs" />
   </ItemGroup>
