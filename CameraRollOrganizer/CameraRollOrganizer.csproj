@@ -124,9 +124,6 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
-    <Compile Include="redirect.ashx.cs">
-      <DependentUpon>redirect.ashx</DependentUpon>
-    </Compile>
     <Compile Include="Utility\Config.cs" />
     <Compile Include="Utility\JsonResultEx.cs" />
     <Compile Include="Utility\OAuthHelper.cs" />
@@ -139,7 +136,6 @@
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
     </None>
-    <Content Include="redirect.ashx" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
