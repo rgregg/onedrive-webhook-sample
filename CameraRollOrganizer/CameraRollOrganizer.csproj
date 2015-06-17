@@ -71,9 +71,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Newtonsoft.Json.6.0.8\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
-    <Reference Include="OneDriveSdk, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="OneDriveSdk, Version=0.1.28.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Microsoft.OneDrive.1.0.0.0\lib\portable-net45+win+wpa81\OneDriveSdk.dll</HintPath>
+      <HintPath>..\packages\Microsoft.OneDrive.SDK.0.1.28.0\lib\portable-net45+win+wpa81\OneDriveSdk.dll</HintPath>
     </Reference>
     <Reference Include="System.Net" />
     <Reference Include="System.Net.Http" />
