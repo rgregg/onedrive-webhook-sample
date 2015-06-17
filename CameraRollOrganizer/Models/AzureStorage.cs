@@ -37,7 +37,7 @@ namespace CameraRollOrganizer.Models
         #region Account Table
         public static async Task InsertAccountAsync(Models.Account account)
         {
-            TableOperation insertOperation = TableOperation.Insert(account);
+            TableOperation insertOperation = TableOperation.InsertOrReplace(account);
             await AccountTable.ExecuteAsync(insertOperation);
         }
 
