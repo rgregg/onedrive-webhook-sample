@@ -28,8 +28,8 @@
             <p><asp:Button runat="server" ID="buttonSaveChanges" Text="Save Changes" OnClick="buttonSaveChanges_Click" /></p>
             
             <p><a href="/signout">Sign Out</a></p>
-            <p><a href="/api/action/createfile">Create Test File</a></p>
-            <p><a href="/api/action/subscriptions">View subscriptions</a></p>
+            <p><a href="/api/action/createfile" target="_blank">Create Test File</a></p>
+            <p><a href="/api/action/subscriptions"  target="_blank">View subscriptions</a></p>
         </asp:Panel>
     </div>
     </form>

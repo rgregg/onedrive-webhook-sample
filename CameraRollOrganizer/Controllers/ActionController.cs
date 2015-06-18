@@ -31,7 +31,7 @@ namespace CameraRollOrganizer.Controllers
 
             OneDriveClient client = new OneDriveClient(Config.Default.OneDriveBaseUrl, account, new HttpProvider(new Serializer()));
             var item = await client.Drive.Root.ItemWithPath("test_file.txt").Content.Request().PutAsync<Item>(GetDummyFileStream());
-
+            
             return JsonResponseEx.Create(HttpStatusCode.OK, item);
         }
 
@@ -62,10 +62,7 @@ namespace CameraRollOrganizer.Controllers
             var response = await request.GetResponseAsync();
             var stream = response.GetResponseStream();
 
-            StreamReader reader = new StreamReader(stream);
-            var responseBody = await reader.ReadToEndAsync();
-
-            return Ok(responseBody);
+            return ContentResponseEx.Create(HttpStatusCode.OK, stream, "text/xml");
         }
 
 
