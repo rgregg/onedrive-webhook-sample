@@ -29,6 +29,7 @@
             
             <p><a href="/signout">Sign Out</a></p>
             <p><a href="/api/action/createfile">Create Test File</a></p>
+            <p><a href="/api/action/subscriptions">View subscriptions</a></p>
         </asp:Panel>
     </div>
     </form>
