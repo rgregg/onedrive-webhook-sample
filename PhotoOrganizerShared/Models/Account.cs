@@ -93,11 +93,14 @@ namespace PhotoOrganizerShared.Models
 
         public string ClientId { get; set; }
 
-        public string AccessToken { 
+        
+        #endregion
+
+        string Microsoft.OneDrive.Sdk.IAuthenticator.AccessToken
+        {
             get { return CachedAccessToken; }
             set { CachedAccessToken = value; } 
         }
-        #endregion
     }
 
     
