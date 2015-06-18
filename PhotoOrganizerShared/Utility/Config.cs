@@ -6,53 +6,56 @@ using System.Web;
 
 namespace PhotoOrganizerShared.Utility
 {
-    public static class Config
+    public interface IConfig
     {
-
-        public static string MsaClientId
+        string MsaClientId
         {
-            get { return ConfigurationManager.AppSettings["MsaClientId"]; }
+            get;
         }
 
-        public static string MsaClientSecret
+        string MsaClientSecret
         {
-            get { return ConfigurationManager.AppSettings["MsaClientSecret"]; }
+            get;
         }
 
-        public static string MsaAuthorizationService
+        string MsaAuthorizationService
         {
-            get { return ConfigurationManager.AppSettings["MsaAuthorizationService"]; }
+            get;
         }
 
-        public static string MsaTokenService
+        string MsaTokenService
         {
-            get { return ConfigurationManager.AppSettings["MsaTokenService"]; }
+            get;
         }
 
-        public static string MsaRedirectionTarget
+        string MsaRedirectionTarget
         {
-            get { return ConfigurationManager.AppSettings["MsaRedirectTarget"]; }
+            get;
         }
 
-        public static string MsaClientScopes
+        string MsaClientScopes
         {
-            get { return ConfigurationManager.AppSettings["MsaScopes"]; }
+            get;
         }
 
-        public static string OneDriveBaseUrl
+        string OneDriveBaseUrl
         {
-            get { return "https://api.onedrive.com/v1.0"; }
+            get;
         }
 
-        public static OAuthHelper MicrosoftAccountOAuth()
+        OAuthHelper MicrosoftAccountOAuth();
+
+        string CookiePassword
         {
-            return new OAuthHelper(Config.MsaTokenService, Config.MsaClientId, Config.MsaClientSecret, Config.MsaRedirectionTarget);
+            get;
         }
 
-        public static string CookiePassword
-        {
-            get { return ConfigurationManager.AppSettings["CookiePassword"]; }
-        }
+        string AzureStorageConnectionString { get; }
 
+    }
+
+    public static class SharedConfig
+    {
+        public static IConfig Default { get; set; }
     }
 }

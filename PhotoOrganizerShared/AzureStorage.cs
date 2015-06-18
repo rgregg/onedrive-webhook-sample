@@ -23,7 +23,12 @@ namespace PhotoOrganizerShared
 
         static AzureStorage()
         {
-            string connectionString = ConfigurationManager.ConnectionStrings["StorageConnectionString"].ConnectionString;
+            InitializeConnections();
+        }
+
+        private static void InitializeConnections()
+        {
+            string connectionString = SharedConfig.Default.AzureStorageConnectionString;
             AzureStorage.StorageAccount = CloudStorageAccount.Parse(connectionString);
 
             CloudTableClient tableClient = StorageAccount.CreateCloudTableClient();
@@ -33,6 +38,7 @@ namespace PhotoOrganizerShared
             CloudQueueClient queueClient = StorageAccount.CreateCloudQueueClient();
             SubscriptionQueue = queueClient.GetQueueReference("subscriptionQueue");
             SubscriptionQueue.CreateIfNotExists();
+
         }
 
 

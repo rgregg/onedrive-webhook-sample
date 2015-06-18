@@ -79,6 +79,7 @@
       <HintPath>..\packages\Microsoft.OneDrive.SDK.0.1.28.0\lib\portable-net45+win+wpa81\OneDriveSdk.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Net" />
     <Reference Include="System.Spatial, Version=5.6.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
@@ -103,6 +104,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Config.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Functions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -111,7 +113,6 @@
     <None Include="App.config">
       <SubType>Designer</SubType>
     </None>
-    <None Include="Fonts\LiveSymbol.ttf" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
