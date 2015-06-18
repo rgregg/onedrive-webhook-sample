@@ -15,7 +15,7 @@ namespace PhotoOrganizerShared.Models
 
         public Account()
         {
-
+            this.Enabled = true;
         }
 
         public Account(OAuthToken token)
@@ -23,7 +23,7 @@ namespace PhotoOrganizerShared.Models
             this.RefreshToken = token.RefreshToken;
             this.CachedAccessToken = token.AccessToken;
             this.CachedAccessTokenExpiration = DateTimeOffset.Now.AddSeconds(token.AccessTokenExpirationDuration);
-
+            this.Enabled = true;
             this.SubfolderFormat = DefaultSubfolderFormatString;
         }
 
@@ -49,6 +49,7 @@ namespace PhotoOrganizerShared.Models
 
         public long WebhooksReceived { get; set; }
 
+        public bool Enabled { get; set; }
 
 
         private string CachedAccessToken { get; set; }

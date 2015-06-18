@@ -41,6 +41,7 @@ namespace CameraRollOrganizer
                     labelPhotosOrganizedCount.Text = account.PhotosOrganized.ToString();
                     labelWebhooksReceived.Text = account.WebhooksReceived.ToString();
                     textBoxFolderFormatString.Text = account.SubfolderFormat;
+                    checkBoxEnableAccount.Checked = account.Enabled;
                 }
             }
         }
@@ -57,11 +58,13 @@ namespace CameraRollOrganizer
 
         protected async void buttonSaveChanges_Click(object sender, EventArgs e)
         {
+            var updateAccount = await Controllers.AuthorizationController.AccountFromCookie(Request.Cookies);
             var format = textBoxFolderFormatString.Text;
-            if (null != account)
+            if (null != updateAccount)
             {
-                account.SubfolderFormat = format;
-                await AzureStorage.UpdateAccountAsync(account);
+                updateAccount.SubfolderFormat = format;
+                updateAccount.Enabled = checkBoxEnableAccount.Checked;
+                await AzureStorage.UpdateAccountAsync(updateAccount);
             }
         }
       

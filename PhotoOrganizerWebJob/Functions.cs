@@ -45,8 +45,15 @@ namespace PhotoOrganizerWebJob
         public static async Task OrganizeAccountCameraRoll(Account account, TextWriter log)
         {
             account.WebhooksReceived += 1;
+            if (account.Enabled)
+            {
+                await CallOneDriveApi(account, log);
+            }
+            await AzureStorage.UpdateAccountAsync(account);
+        }
 
-            
+        private static async Task CallOneDriveApi(Account account, TextWriter log)
+        {
             OneDriveClient client = new OneDriveClient(OneDriveApiRootUrl, account, CachedHttpProvider);
             IChildrenCollectionPage response = null;
             try
@@ -83,7 +90,7 @@ namespace PhotoOrganizerWebJob
                     if (null != destinationFolder)
                     {
                         account.PhotosOrganized += 1;
-                        var patchedItem = new Item { ParentReference = new ItemReference { Path = item.ParentReference.Path + "/" + destinationFolder }};
+                        var patchedItem = new Item { ParentReference = new ItemReference { Path = item.ParentReference.Path + "/" + destinationFolder } };
                         try
                         {
                             await client.Drive.Items[item.Id].Request().UpdateAsync(patchedItem);
@@ -95,7 +102,6 @@ namespace PhotoOrganizerWebJob
                     }
                 }
             }
-            await AzureStorage.UpdateAccountAsync(account);
         }
     }
 }
