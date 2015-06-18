@@ -3,12 +3,12 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace CameraRollOrganizer.Utility
+namespace PhotoOrganizerShared.Utility
 {
     /// <summary>
     /// Basic encryption / decryption support. Copied from http://stackoverflow.com/questions/273452/using-aes-encryption-in-c-sharp
     /// </summary>
-    internal static class Cryptography
+    public static class Cryptography
     {
         #region Settings
 
@@ -92,7 +92,7 @@ namespace CameraRollOrganizer.Utility
                         }
                     }
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     return String.Empty;
                 }

@@ -1,5 +1,8 @@
 ﻿using CameraRollOrganizer.Utility;
 using Microsoft.OneDrive.Sdk;
+using PhotoOrganizerShared;
+using PhotoOrganizerShared.Models;
+using PhotoOrganizerShared.Utility;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
@@ -22,8 +25,8 @@ namespace CameraRollOrganizer.Controllers
         {
             // Redeem authorization code for account information
 
-            Utility.OAuthHelper helper = new Utility.OAuthHelper(Utility.Config.MsaTokenService, 
-                Utility.Config.MsaClientId, Utility.Config.MsaClientSecret, Utility.Config.MsaRedirectionTarget);
+            OAuthHelper helper = new OAuthHelper(Config.MsaTokenService, 
+                Config.MsaClientId, Config.MsaClientSecret, Config.MsaRedirectionTarget);
 
             var token = await helper.RedeemAuthorizationCodeAsync(code);
             if (null == token)
@@ -31,7 +34,7 @@ namespace CameraRollOrganizer.Controllers
                 return JsonResponseEx.Create(HttpStatusCode.InternalServerError, new { message = "Invalid response from token service.", code = "tokenServiceNullResponse" });
             }
             
-            Models.Account account = new Models.Account(token);
+            Account account = new Account(token);
             OneDriveClient client = new OneDriveClient(Config.OneDriveBaseUrl, account, new HttpProvider(new Serializer()));
 
             var rootDrive = await client.Drive.Request().GetAsync();
@@ -39,7 +42,7 @@ namespace CameraRollOrganizer.Controllers
             account.Id = rootDrive.Id;
             account.DisplayName = rootDrive.Owner.User.DisplayName;
             
-            await Models.AzureStorage.InsertAccountAsync(account);
+            await AzureStorage.InsertAccountAsync(account);
 
             var authCookie = CookieForAccount(account);
 
@@ -57,7 +60,7 @@ namespace CameraRollOrganizer.Controllers
             return message;
         }
 
-        public static CookieHeaderValue CookieForAccount(Models.Account account)
+        public static CookieHeaderValue CookieForAccount(Account account)
         {
             var nv = new NameValueCollection();
             nv["id"] = null != account ? account.Id.Encrypt(Config.CookiePassword) : "";
@@ -72,7 +75,7 @@ namespace CameraRollOrganizer.Controllers
             return cookie;
         }
 
-        public static async Task<Models.Account> AccountFromCookie(HttpCookieCollection cookies)
+        public static async Task<Account> AccountFromCookie(HttpCookieCollection cookies)
         {
             var sessionCookie = cookies["session"];
             if (null == sessionCookie) 
@@ -89,7 +92,7 @@ namespace CameraRollOrganizer.Controllers
 
             if (null != accountId)
             {
-                var account = await Models.AzureStorage.LookupAccountAsync(accountId);
+                var account = await AzureStorage.LookupAccountAsync(accountId);
                 return account;
             }
 

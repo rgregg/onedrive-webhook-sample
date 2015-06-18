@@ -1,4 +1,5 @@
 ﻿using CameraRollOrganizer.Utility;
+using PhotoOrganizerShared.Utility;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -45,12 +46,12 @@ namespace CameraRollOrganizer
 
         private void GenerateSignInLink()
         {
-            Utility.QueryStringBuilder qsb = new Utility.QueryStringBuilder();
-            qsb.Add("client_id", Utility.Config.MsaClientId);
-            qsb.Add("scope", Utility.Config.MsaClientScopes);
+            QueryStringBuilder qsb = new QueryStringBuilder();
+            qsb.Add("client_id", Config.MsaClientId);
+            qsb.Add("scope", Config.MsaClientScopes);
             qsb.Add("response_type", "code");
-            qsb.Add("redirect_uri", Utility.Config.MsaRedirectionTarget);
-            linkToSignIn.NavigateUrl = Utility.Config.MsaAuthorizationService + qsb.ToString();
+            qsb.Add("redirect_uri", Config.MsaRedirectionTarget);
+            linkToSignIn.NavigateUrl = Config.MsaAuthorizationService + qsb.ToString();
         }
       
     }

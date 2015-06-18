@@ -4,7 +4,7 @@ using System.Configuration;
 using System.Linq;
 using System.Web;
 
-namespace CameraRollOrganizer.Utility
+namespace PhotoOrganizerShared.Utility
 {
     public static class Config
     {

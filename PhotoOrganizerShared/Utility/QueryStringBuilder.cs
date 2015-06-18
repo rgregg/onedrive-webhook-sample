@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CameraRollOrganizer.Utility
+namespace PhotoOrganizerShared.Utility
 {
     public class QueryStringBuilder
     {

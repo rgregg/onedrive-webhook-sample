@@ -1,6 +1,8 @@
 ﻿using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Queue;
 using Microsoft.WindowsAzure.Storage.Table;
+using PhotoOrganizerShared.Models;
+using PhotoOrganizerShared.Utility;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -8,7 +10,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
 
-namespace CameraRollOrganizer.Models
+namespace PhotoOrganizerShared
 {
     public static class AzureStorage
     {
@@ -29,7 +31,7 @@ namespace CameraRollOrganizer.Models
             AccountTable.CreateIfNotExists();
 
             CloudQueueClient queueClient = StorageAccount.CreateCloudQueueClient();
-            SubscriptionQueue = queueClient.GetQueueReference("subscriptions");
+            SubscriptionQueue = queueClient.GetQueueReference("subscriptionQueue");
             SubscriptionQueue.CreateIfNotExists();
         }
 
@@ -59,18 +61,11 @@ namespace CameraRollOrganizer.Models
 
         public static async Task AddToPendingSubscriptionQueueAsync(OneDriveNotification notification)
         {
-            CloudQueueMessage message = new CloudQueueMessage(notification.UserId);
+            QueryStringBuilder qsb = new QueryStringBuilder { StartCharacter = null };
+            qsb.Add("id", notification.UserId);
+
+            CloudQueueMessage message = new CloudQueueMessage(qsb.ToString());
             await SubscriptionQueue.AddMessageAsync(message);
-        }
-
-        public static async Task<OneDriveNotification> GetPendingSubscriptionAsync()
-        {
-            CloudQueueMessage message = await SubscriptionQueue.GetMessageAsync(TimeSpan.FromMinutes(5), null, null);
-
-            OneDriveNotification notification = new OneDriveNotification { UserId = message.AsString };
-            await SubscriptionQueue.DeleteMessageAsync(message);
-
-            return notification;
         }
 
         public static async Task<int> GetPendingSubscriptionQueueDepthAsync()

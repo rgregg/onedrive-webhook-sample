@@ -7,7 +7,7 @@ using System.Net;
 using System.Threading.Tasks;
 using System.Web;
 
-namespace CameraRollOrganizer.Utility
+namespace PhotoOrganizerShared.Utility
 {
     public class OAuthHelper
     {

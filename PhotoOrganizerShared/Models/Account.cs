@@ -5,9 +5,9 @@ using System.Web;
 using System.Configuration;
 using Microsoft.WindowsAzure.Storage.Table;
 using System.Threading.Tasks;
-using CameraRollOrganizer.Utility;
+using PhotoOrganizerShared.Utility;
 
-namespace CameraRollOrganizer.Models
+namespace PhotoOrganizerShared.Models
 {
     public class Account : TableEntity, Microsoft.OneDrive.Sdk.IAuthenticator
     {
