@@ -46,44 +46,55 @@ namespace PhotoOrganizerWebJob
         {
             account.WebhooksReceived += 1;
 
+            
             OneDriveClient client = new OneDriveClient(OneDriveApiRootUrl, account, CachedHttpProvider);
-            var childrenRequest = client.Drive.Special["cameraroll"].Children.Request();
-            var response = await childrenRequest.GetAsync();
-
-            foreach (var item in response)
+            IChildrenCollectionPage response = null;
+            try
             {
-                string destinationFolder = null;
-                if (null != item.Photo && null != item.Photo.TakenDateTime)
-                {
-                    await log.WriteLineAsync("Processing photo: " + item.Name);
-                    destinationFolder = item.Photo.TakenDateTime.Value.ToString(account.SubfolderFormat);
-                }
-                else if (null != item.Image && null != item.CreatedDateTime)
-                {
-                    await log.WriteLineAsync("Processing image: " + item.Name);
-                    destinationFolder = item.CreatedDateTime.Value.ToString(account.SubfolderFormat);
-                }
-                else
-                {
-                    await log.WriteLineAsync("Skipped item: " + item.Name);
-                    continue;
-                }
+                var childrenRequest = client.Drive.Special["cameraroll"].Children.Request();
+                response = await childrenRequest.GetAsync();
+            }
+            catch (Exception ex)
+            {
+                log.WriteLine("Exception getting cameraroll children: " + ex.ToString());
+            }
 
-                if (null != destinationFolder)
+            if (null != response)
+            {
+                foreach (var item in response)
                 {
-                    account.PhotosOrganized += 1;
-                    var patchedItem = new Item { ParentReference = new ItemReference { Path = item.ParentReference.Path + "/" + destinationFolder }};
-                    try
+                    string destinationFolder = null;
+                    if (null != item.Photo && null != item.Photo.TakenDateTime)
                     {
-                        await client.Drive.Items[item.Id].Request().UpdateAsync(patchedItem);
+                        await log.WriteLineAsync("Processing photo: " + item.Name);
+                        destinationFolder = item.Photo.TakenDateTime.Value.ToString(account.SubfolderFormat);
                     }
-                    catch (OneDriveException ex)
+                    else if (null != item.Image && null != item.CreatedDateTime)
                     {
-                        log.WriteLine("Exception thrown: " + ex.ToString());
+                        await log.WriteLineAsync("Processing image: " + item.Name);
+                        destinationFolder = item.CreatedDateTime.Value.ToString(account.SubfolderFormat);
+                    }
+                    else
+                    {
+                        await log.WriteLineAsync("Skipped item: " + item.Name);
+                        continue;
+                    }
+
+                    if (null != destinationFolder)
+                    {
+                        account.PhotosOrganized += 1;
+                        var patchedItem = new Item { ParentReference = new ItemReference { Path = item.ParentReference.Path + "/" + destinationFolder }};
+                        try
+                        {
+                            await client.Drive.Items[item.Id].Request().UpdateAsync(patchedItem);
+                        }
+                        catch (OneDriveException ex)
+                        {
+                            log.WriteLine("Exception thrown: " + ex.ToString());
+                        }
                     }
                 }
             }
-
             await AzureStorage.UpdateAccountAsync(account);
         }
     }
