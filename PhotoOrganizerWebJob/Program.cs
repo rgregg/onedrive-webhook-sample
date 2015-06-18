@@ -14,6 +14,9 @@ namespace PhotoOrganizerWebJob
         // AzureWebJobsDashboard and AzureWebJobsStorage
         static void Main()
         {
+            // Init the shared configuration object
+            Console.WriteLine("OneDrive URL: " + Config.Default.OneDriveBaseUrl);
+
             var host = new JobHost();
             // The following code ensures that the WebJob will be running continuously
             host.RunAndBlock();

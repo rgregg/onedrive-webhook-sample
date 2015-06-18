@@ -47,7 +47,7 @@ namespace PhotoOrganizerWebJob
             account.WebhooksReceived += 1;
 
             OneDriveClient client = new OneDriveClient(OneDriveApiRootUrl, account, CachedHttpProvider);
-            var childrenRequest = client.Drive.Special["cameraroll"].Children.Request().Select("id,name,photo,image,size,eTag").Top("100");
+            var childrenRequest = client.Drive.Special["cameraroll"].Children.Request();
             var response = await childrenRequest.GetAsync();
 
             foreach (var item in response)
