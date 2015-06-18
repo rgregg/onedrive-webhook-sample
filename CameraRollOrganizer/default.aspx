@@ -24,9 +24,11 @@
             <p>Photos organized: <asp:Label runat="server" ID="labelPhotosOrganizedCount"></asp:Label></p>
             <p>Webhooks Received: <asp:Label runat="server" ID="labelWebhooksReceived"></asp:Label></p>
             <p>Folder Format: <asp:TextBox runat="server" ID="textBoxFolderFormatString"></asp:TextBox></p>
-
-            <p><a href="/signout">Sign Out</a></p>
+            
             <p><asp:Button runat="server" ID="buttonSaveChanges" Text="Save Changes" OnClick="buttonSaveChanges_Click" /></p>
+            
+            <p><a href="/signout">Sign Out</a></p>
+            <p><a href="/api/action/createfile">Create Test File</a></p>
         </asp:Panel>
     </div>
     </form>

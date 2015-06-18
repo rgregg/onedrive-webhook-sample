@@ -22,7 +22,7 @@ namespace CameraRollOrganizer.Controllers
             {
                 return JsonResponseEx.Create(HttpStatusCode.Unauthorized, new { message = "Session cookie is missing." });
             }
-            var sessionCookieValue = cookies["session"].Value;
+            var sessionCookieValue = cookies["session"].Values;
             var account = await AuthorizationController.AccountFromCookie(sessionCookieValue);
             if (null == account)
             {
@@ -33,6 +33,39 @@ namespace CameraRollOrganizer.Controllers
             var item = await client.Drive.Root.ItemWithPath("test_file.txt").Content.Request().PutAsync<Item>(GetDummyFileStream());
 
             return JsonResponseEx.Create(HttpStatusCode.OK, item);
+        }
+
+        [HttpGet, Route("api/action/subscriptions")]
+        public async Task<IHttpActionResult> Subscriptions()
+        {
+            var cookies = Request.Headers.GetCookies("session").FirstOrDefault();
+            if (cookies == null)
+            {
+                return JsonResponseEx.Create(HttpStatusCode.Unauthorized, new { message = "Session cookie is missing." });
+            }
+            var sessionCookieValue = cookies["session"].Values;
+            var account = await AuthorizationController.AccountFromCookie(sessionCookieValue);
+            if (null == account)
+            {
+                return JsonResponseEx.Create(HttpStatusCode.Unauthorized, new { message = "Failed to locate an account for the auth cookie." });
+            }
+
+            var accessToken = await account.Authenticate();
+            if (null == accessToken)
+            {
+                return JsonResponseEx.Create(HttpStatusCode.InternalServerError, new { message = "Error getting access_token" });
+            }
+
+            var request = HttpWebRequest.CreateHttp("https://storage.live.com/MyData/LiveFolders/?NotificationSubscriptions");
+            request.Headers.Add("Authorization", "Bearer " + accessToken);
+
+            var response = await request.GetResponseAsync();
+            var stream = response.GetResponseStream();
+
+            StreamReader reader = new StreamReader(stream);
+            var responseBody = await reader.ReadToEndAsync();
+
+            return Ok(responseBody);
         }
 
 
