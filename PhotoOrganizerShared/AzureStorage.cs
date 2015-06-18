@@ -36,7 +36,7 @@ namespace PhotoOrganizerShared
             AccountTable.CreateIfNotExists();
 
             CloudQueueClient queueClient = StorageAccount.CreateCloudQueueClient();
-            SubscriptionQueue = queueClient.GetQueueReference("subscriptionQueue");
+            SubscriptionQueue = queueClient.GetQueueReference("subscriptions");
             SubscriptionQueue.CreateIfNotExists();
 
         }

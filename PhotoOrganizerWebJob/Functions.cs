@@ -20,7 +20,7 @@ namespace PhotoOrganizerWebJob
 
         // This function will get triggered/executed when a new message is written 
         // on an Azure Queue called queue.
-        public static async Task ProcessQueueMessage([QueueTrigger("subscriptionQueue")] string message, TextWriter log)
+        public static async Task ProcessQueueMessage([QueueTrigger("subscriptions")] string message, TextWriter log)
         {
             log.WriteLine(message);
 

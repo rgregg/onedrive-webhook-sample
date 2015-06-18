@@ -40,6 +40,7 @@ namespace CameraRollOrganizer
                     labelAccountId.Text = account.Id;
                     labelPhotosOrganizedCount.Text = account.PhotosOrganized.ToString();
                     labelWebhooksReceived.Text = account.WebhooksReceived.ToString();
+                    textBoxFolderFormatString.Text = account.SubfolderFormat;
                 }
             }
         }
