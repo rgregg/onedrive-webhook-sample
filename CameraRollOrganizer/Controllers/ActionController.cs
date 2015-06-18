@@ -14,7 +14,7 @@ namespace CameraRollOrganizer.Controllers
 {
     public class ActionController : ApiController
     {
-        [HttpGet, Route("/api/action/createfile")]
+        [HttpGet, Route("api/action/createfile")]
         public async Task<IHttpActionResult> CreateFile()
         {
             var cookies = Request.Headers.GetCookies("session").FirstOrDefault();
