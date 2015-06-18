@@ -18,10 +18,16 @@ namespace CameraRollOrganizer.Controllers
         public async Task<IHttpActionResult> CreateFile()
         {
             var cookies = Request.Headers.GetCookies("session").FirstOrDefault();
+            if (cookies == null)
+            {
+                return JsonResponseEx.Create(HttpStatusCode.Unauthorized, new { message = "Session cookie is missing." });
+            }
             var sessionCookieValue = cookies["session"].Value;
             var account = await AuthorizationController.AccountFromCookie(sessionCookieValue);
             if (null == account)
-                return  JsonResponseEx.Create(HttpStatusCode.Unauthorized, new { message = "Session cookie missing or invalid." });
+            {
+                return JsonResponseEx.Create(HttpStatusCode.Unauthorized, new { message = "Failed to locate an account for the auth cookie." });
+            }
 
             OneDriveClient client = new OneDriveClient(Config.Default.OneDriveBaseUrl, account, new HttpProvider(new Serializer()));
             var item = await client.Drive.Root.ItemWithPath("test_file.txt").Content.Request().PutAsync<Item>(GetDummyFileStream());
