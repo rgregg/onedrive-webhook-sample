@@ -52,7 +52,8 @@ namespace CameraRollOrganizer.Controllers
             }
             else
             {
-                account.SetTokenResponse(token);
+                existingAccount.SetTokenResponse(token);
+                await AzureStorage.UpdateAccountAsync(existingAccount);
             }
 
             var authCookie = CookieForAccount(existingAccount);

@@ -82,7 +82,6 @@ namespace PhotoOrganizerShared.Models
             if (null != token)
             {
                 SetTokenResponse(token);
-                await AzureStorage.UpdateAccountAsync(this);
                 return token.AccessToken;
             }
 
