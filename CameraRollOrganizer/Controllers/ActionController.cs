@@ -30,7 +30,7 @@ namespace CameraRollOrganizer.Controllers
             }
 
             OneDriveClient client = new OneDriveClient(Config.Default.OneDriveBaseUrl, account, new HttpProvider(new Serializer()));
-            var item = await client.Drive.Root.ItemWithPath("test_file.txt").Content.Request().PutAsync<Item>(GetDummyFileStream());
+            var item = await client.Drive.Special[account.SourceFolder].ItemWithPath("test_file.txt").Content.Request().PutAsync<Item>(GetDummyFileStream());
             
             return JsonResponseEx.Create(HttpStatusCode.OK, item);
         }

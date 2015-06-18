@@ -58,12 +58,13 @@ namespace PhotoOrganizerWebJob
             IChildrenCollectionPage response = null;
             try
             {
-                var childrenRequest = client.Drive.Special["cameraroll"].Children.Request();
+                var specialFolderName = account.SourceFolder;
+                var childrenRequest = client.Drive.Special[specialFolderName].Children.Request();
                 response = await childrenRequest.GetAsync();
             }
             catch (Exception ex)
             {
-                log.WriteLine("Exception getting cameraroll children: " + ex.ToString());
+                log.WriteLine("Exception getting '" + account.SourceFolder + "' children: " + ex.ToString());
             }
 
             if (null != response)
@@ -74,12 +75,12 @@ namespace PhotoOrganizerWebJob
                     if (null != item.Photo && null != item.Photo.TakenDateTime)
                     {
                         await log.WriteLineAsync("Processing photo: " + item.Name);
-                        destinationFolder = item.Photo.TakenDateTime.Value.ToString(account.SubfolderFormat);
+                        destinationFolder = string.Format(account.SubfolderFormat, item.Photo.TakenDateTime.Value);
                     }
                     else if (null != item.Image && null != item.CreatedDateTime)
                     {
                         await log.WriteLineAsync("Processing image: " + item.Name);
-                        destinationFolder = item.CreatedDateTime.Value.ToString(account.SubfolderFormat);
+                        destinationFolder = string.Format(account.SubfolderFormat, item.CreatedDateTime.Value);
                     }
                     else
                     {

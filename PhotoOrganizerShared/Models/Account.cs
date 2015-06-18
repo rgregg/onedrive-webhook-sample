@@ -11,21 +11,28 @@ namespace PhotoOrganizerShared.Models
 {
     public class Account : TableEntity, Microsoft.OneDrive.Sdk.IAuthenticator
     {
-        private const string DefaultSubfolderFormatString = "yyyy/MM - MMMM";
+        private const string DefaultSubfolderFormatString = "Years/{0:yyyy/MM - MMMM}";
 
         public Account()
         {
-            this.Enabled = true;
+            SetDefaultPropertyValues();
         }
 
         public Account(OAuthToken token)
         {
-            this.RefreshToken = token.RefreshToken;
-            this.CachedAccessToken = token.AccessToken;
-            this.CachedAccessTokenExpiration = DateTimeOffset.Now.AddSeconds(token.AccessTokenExpirationDuration);
+            SetDefaultPropertyValues();
+
+            SetTokenResponse(token);
+        }
+
+        private void SetDefaultPropertyValues()
+        {
             this.Enabled = true;
             this.SubfolderFormat = DefaultSubfolderFormatString;
+            this.SourceFolder = "approot";
         }
+
+
 
         public string Id 
         {
@@ -51,6 +58,7 @@ namespace PhotoOrganizerShared.Models
 
         public bool Enabled { get; set; }
 
+        public string SourceFolder { get; set; }
 
         private string CachedAccessToken { get; set; }
 
@@ -73,14 +81,8 @@ namespace PhotoOrganizerShared.Models
             var token = await oauth.RedeemRefreshTokenAsync(this.RefreshToken);
             if (null != token)
             {
-                CachedAccessToken = token.AccessToken;
-                CachedAccessTokenExpiration = DateTimeOffset.Now.AddSeconds(token.AccessTokenExpirationDuration);
-
-                if (null != RefreshToken)
-                {
-                    RefreshToken = token.RefreshToken;
-                }
-
+                SetTokenResponse(token);
+                await AzureStorage.UpdateAccountAsync(this);
                 return token.AccessToken;
             }
 
@@ -101,6 +103,17 @@ namespace PhotoOrganizerShared.Models
         {
             get { return CachedAccessToken; }
             set { CachedAccessToken = value; } 
+        }
+
+        public void SetTokenResponse(OAuthToken token)
+        {
+            CachedAccessToken = token.AccessToken;
+            CachedAccessTokenExpiration = DateTimeOffset.Now.AddSeconds(token.AccessTokenExpirationDuration);
+
+            if (null != token.RefreshToken)
+            {
+                RefreshToken = token.RefreshToken;
+            }
         }
     }
 
