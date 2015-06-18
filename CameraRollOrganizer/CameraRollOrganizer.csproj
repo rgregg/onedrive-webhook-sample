@@ -137,6 +137,7 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
+    <Compile Include="RedirectResponseEx.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="packages.config" />

@@ -45,7 +45,7 @@ namespace PhotoOrganizerShared
         #region Account Table
         public static async Task InsertAccountAsync(Models.Account account)
         {
-            TableOperation insertOperation = TableOperation.InsertOrReplace(account);
+            TableOperation insertOperation = TableOperation.Insert(account);
             await AccountTable.ExecuteAsync(insertOperation);
         }
 

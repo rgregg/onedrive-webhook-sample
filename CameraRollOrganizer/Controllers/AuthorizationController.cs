@@ -43,12 +43,17 @@ namespace CameraRollOrganizer.Controllers
 
             account.Id = rootDrive.Id;
             account.DisplayName = rootDrive.Owner.User.DisplayName;
-            
-            await AzureStorage.InsertAccountAsync(account);
 
-            var authCookie = CookieForAccount(account);
+            var existingAccount = await AzureStorage.LookupAccountAsync(rootDrive.Id);
+            if (null == existingAccount)
+            {
+                await AzureStorage.InsertAccountAsync(account);
+                existingAccount = account;
+            }
 
-            return JsonResponseEx.Create(HttpStatusCode.OK, new { message = "Account information saved." }, authCookie);
+            var authCookie = CookieForAccount(existingAccount);
+
+            return RedirectResponseEx.Create("/default.aspx", authCookie);
         }
 
 
