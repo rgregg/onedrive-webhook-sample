@@ -19,7 +19,7 @@ namespace CameraRollOrganizer.Controllers
                 return BadRequest("Missing correctly formatted notification value");
             }
 
-            //TrackIncomingWebhook(webhook);
+            ActionController.LastWebhookReceived = webhook;
 
             foreach (var notification in webhook.Value)
             {

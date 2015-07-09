@@ -66,6 +66,14 @@ namespace CameraRollOrganizer.Controllers
         }
 
 
+        internal static PhotoOrganizerShared.Models.OneDriveWebhook LastWebhookReceived { get; set; }
+
+        [HttpGet, Route("api/action/lastwebhook")]
+        public IHttpActionResult LastWebhook()
+        {
+            return Ok(LastWebhookReceived);
+        }
+
         private Stream GetDummyFileStream()
         {
             var bytes = System.Text.Encoding.UTF8.GetBytes("This is a dummy file that can be deleted");
