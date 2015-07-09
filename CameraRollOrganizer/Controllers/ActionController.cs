@@ -1,5 +1,6 @@
 ﻿using CameraRollOrganizer.Utility;
 using Microsoft.OneDrive.Sdk;
+using Newtonsoft.Json;
 using PhotoOrganizerShared.Utility;
 using System;
 using System.Collections.Generic;
@@ -71,7 +72,14 @@ namespace CameraRollOrganizer.Controllers
         [HttpGet, Route("api/action/lastwebhook")]
         public IHttpActionResult LastWebhook()
         {
-            return Ok(LastWebhookReceived);
+            if (LastWebhookReceived != null)
+            {
+                return JsonResponseEx.Create(HttpStatusCode.OK, LastWebhookReceived);
+            }
+            else
+            {
+                return NotFound();
+            }
         }
 
         private Stream GetDummyFileStream()
