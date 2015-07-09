@@ -24,6 +24,13 @@ namespace CameraRollOrganizer
             return new ContentResponseEx(statusCode, bodyStream, contentType, cookie);
         }
 
+        public static IHttpActionResult Create(HttpStatusCode statusCode, string bodyText, string contentType = "application/octet-stream", CookieHeaderValue cookie = null)
+        {
+            var bytes = System.Text.Encoding.UTF8.GetBytes(bodyText);
+            MemoryStream stream = new MemoryStream(bytes);
+            return new ContentResponseEx(statusCode, stream, contentType, cookie);
+        }
+
         public ContentResponseEx(HttpStatusCode statusCode, Stream body, string contentType, CookieHeaderValue cookie = null)
         {
             _statusCode = statusCode;

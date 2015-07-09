@@ -32,7 +32,7 @@
 
             <p><a href="/signout">Sign Out</a></p>
             <p><a href="/api/action/createfile" target="_blank">Create Test File</a></p>
-            <p><a href="/api/action/subscriptions"  target="_blank">View subscriptions</a></p>
+            <p><a href="/api/action/subscriptions?path=Apps/webhook%20sample"  target="_blank">View subscriptions</a></p>
         </asp:Panel>
     </div>
     </form>

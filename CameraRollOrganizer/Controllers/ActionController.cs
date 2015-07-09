@@ -66,7 +66,6 @@ namespace CameraRollOrganizer.Controllers
             return ContentResponseEx.Create(HttpStatusCode.OK, stream, "text/xml");
         }
 
-
         internal static PhotoOrganizerShared.Models.OneDriveWebhook LastWebhookReceived { get; set; }
 
         [HttpGet, Route("api/action/lastwebhook")]
