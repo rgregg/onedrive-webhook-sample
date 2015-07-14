@@ -23,10 +23,9 @@ namespace PhotoOrganizerShared
 
         static AzureStorage()
         {
-            InitializeConnections();
         }
 
-        private static void InitializeConnections()
+        public static void InitializeConnections()
         {
             string connectionString = SharedConfig.Default.AzureStorageConnectionString;
             AzureStorage.StorageAccount = CloudStorageAccount.Parse(connectionString);
