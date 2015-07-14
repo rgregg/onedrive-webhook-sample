@@ -17,6 +17,7 @@ namespace PhotoOrganizerWebJob
         private const string OneDriveApiRootUrl = "https://api.onedrive.com/v1.0";
 
         private static readonly IHttpProvider CachedHttpProvider = new HttpProvider(new Serializer());
+        private static KeyedLock AccountLocker = new KeyedLock();
 
         // This function will get triggered/executed when a new message is written 
         // on an Azure Queue called queue.
@@ -48,9 +49,21 @@ namespace PhotoOrganizerWebJob
         public static async Task RunJobForAccount(Account account, TextWriter log)
         {
             account.WebhooksReceived += 1;
-            if (account.Enabled)
+            bool acquiredLock = AccountLocker.TryAcquireLock(account.Id);
+            if (acquiredLock && account.Enabled)
             {
-                await OrganizePhotosInAccount(account, log);
+                try
+                {
+                    await OrganizePhotosInAccount(account, log);
+                }
+                catch (Exception ex)
+                {
+                    log.WriteFormattedLine("Exception: {0}", ex);
+                }
+                finally
+                {
+                    AccountLocker.ReleaseLock(account.Id);
+                }
             }
             await AzureStorage.UpdateAccountAsync(account);
         }
@@ -91,6 +104,9 @@ namespace PhotoOrganizerWebJob
                 string destinationFolder = null;
                 await log.WriteFormattedLineAsync("Processing item: {0} [{1}]", item.Name, item.Id);
 
+                if (item.Folder != null)
+                    continue;
+
                 if (null != item.Photo && null != item.Photo.TakenDateTime)
                 {
                     destinationFolder = string.Format(account.SubfolderFormat, item.Photo.TakenDateTime.Value);
@@ -115,12 +131,15 @@ namespace PhotoOrganizerWebJob
                 if (null != destinationFolder)
                 {
                     account.PhotosOrganized += 1;
-                    var patchedItem = new Item { ParentReference = new ItemReference { Path = Path.Combine(item.ParentReference.Path, destinationFolder) } };
-
-                    await log.WriteFormattedLineAsync("Patching item [{0}] with new parentReference: {1}", item.Id, patchedItem.ParentReference);
+                    await log.WriteFormattedLineAsync("Patching item [{0}] with new destination folder: {1}", item.Id, destinationFolder);
 
                     try
                     {
+                        // Ensure that this folder exists already
+                        var destinationFolderItem = await client.Drive.Items[item.ParentReference.Id].ItemWithPath(destinationFolder).Request().UpdateAsync(new Item { Folder = new Folder() });
+
+                        var patchedItem = new Item { ParentReference = new ItemReference() { Id = destinationFolderItem.Id } };
+
                         await client.Drive.Items[item.Id].Request().UpdateAsync(patchedItem);
                     }
                     catch (OneDriveException ex)
