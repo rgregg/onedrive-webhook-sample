@@ -1,24 +1,23 @@
-﻿using System;
+﻿using PhotoOrganizerShared.Utility;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
 using System.Web;
 
-namespace PhotoOrganizerShared.Utility
+namespace CameraRollOrganizer
 {
-    public class Config : IConfig
+    public class WebAppConfig : IConfig
     {
-
-        static Config()
-        {
-            SharedConfig.Default = new Config();
-        }
-
         public static PhotoOrganizerShared.Utility.IConfig Default
         {
             get
             {
-                return PhotoOrganizerShared.Utility.SharedConfig.Default;
+                if (null == SharedConfig.Default)
+                {
+                    SharedConfig.Default = new WebAppConfig();
+                }
+                return SharedConfig.Default;
             }
         }
 

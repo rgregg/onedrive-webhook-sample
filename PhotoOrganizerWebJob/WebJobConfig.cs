@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PhotoOrganizerShared.Utility;
+using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
@@ -6,18 +7,18 @@ using System.Web;
 
 namespace PhotoOrganizerWebJob
 {
-    public class Config : PhotoOrganizerShared.Utility.IConfig
+    public class WebJobConfig : PhotoOrganizerShared.Utility.IConfig
     {
-        static Config()
-        {
-            PhotoOrganizerShared.Utility.SharedConfig.Default = new Config();
-        }
-
         public static PhotoOrganizerShared.Utility.IConfig Default
         {
             get
             {
-                return PhotoOrganizerShared.Utility.SharedConfig.Default;
+                if (null == SharedConfig.Default)
+                {
+                    SharedConfig.Default = new WebJobConfig();
+                }
+                return SharedConfig.Default;
+
             }
         }
 

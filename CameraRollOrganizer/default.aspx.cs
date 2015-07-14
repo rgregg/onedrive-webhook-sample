@@ -50,11 +50,11 @@ namespace CameraRollOrganizer
         private void GenerateSignInLink()
         {
             QueryStringBuilder qsb = new QueryStringBuilder();
-            qsb.Add("client_id", Config.Default.MsaClientId);
-            qsb.Add("scope", Config.Default.MsaClientScopes);
+            qsb.Add("client_id", WebAppConfig.Default.MsaClientId);
+            qsb.Add("scope", WebAppConfig.Default.MsaClientScopes);
             qsb.Add("response_type", "code");
-            qsb.Add("redirect_uri", Config.Default.MsaRedirectionTarget);
-            linkToSignIn.NavigateUrl = Config.Default.MsaAuthorizationService + qsb.ToString();
+            qsb.Add("redirect_uri", WebAppConfig.Default.MsaRedirectionTarget);
+            linkToSignIn.NavigateUrl = WebAppConfig.Default.MsaAuthorizationService + qsb.ToString();
         }
 
         protected async void buttonSaveChanges_Click(object sender, EventArgs e)

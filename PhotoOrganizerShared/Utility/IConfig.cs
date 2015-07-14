@@ -53,9 +53,4 @@ namespace PhotoOrganizerShared.Utility
         string AzureStorageConnectionString { get; }
 
     }
-
-    public static class SharedConfig
-    {
-        public static IConfig Default { get; set; }
-    }
 }

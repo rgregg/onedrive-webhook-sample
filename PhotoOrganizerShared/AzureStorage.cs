@@ -25,9 +25,11 @@ namespace PhotoOrganizerShared
         {
         }
 
-        public static void InitializeConnections()
+        public static void InitializeConnections(IConfig configuration)
         {
-            string connectionString = SharedConfig.Default.AzureStorageConnectionString;
+            if (null == configuration) throw new ArgumentNullException("configuration");
+
+            string connectionString = configuration.AzureStorageConnectionString;
             AzureStorage.StorageAccount = CloudStorageAccount.Parse(connectionString);
 
             CloudTableClient tableClient = StorageAccount.CreateCloudTableClient();

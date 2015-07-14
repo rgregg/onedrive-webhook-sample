@@ -10,7 +10,7 @@ namespace CameraRollOrganizer
         public static void Register(HttpConfiguration config)
         {
             // Web API configuration and services
-            PhotoOrganizerShared.AzureStorage.InitializeConnections();
+            PhotoOrganizerShared.AzureStorage.InitializeConnections(WebAppConfig.Default);
 
             // Web API routes
             config.MapHttpAttributeRoutes();
