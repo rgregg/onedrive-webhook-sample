@@ -32,74 +32,100 @@ namespace PhotoOrganizerWebJob
                 return;
             }
 
+            await log.WriteFormattedLineAsync("Processing webhook for user: {0}", userId);
+            
+
             var account = await AzureStorage.LookupAccountAsync(userId);
             if (null == account)
             {
-                await log.WriteLineAsync("Unable to locate matching account for id: " + userId);
+                await log.WriteFormattedLineAsync("Unable to locate account for id: {0}", userId);
                 return;
             }
 
-            await OrganizeAccountCameraRoll(account, log);
+            await RunJobForAccount(account, log);
         }
 
-        public static async Task OrganizeAccountCameraRoll(Account account, TextWriter log)
+        public static async Task RunJobForAccount(Account account, TextWriter log)
         {
             account.WebhooksReceived += 1;
             if (account.Enabled)
             {
-                await CallOneDriveApi(account, log);
+                await OrganizePhotosInAccount(account, log);
             }
             await AzureStorage.UpdateAccountAsync(account);
         }
 
-        private static async Task CallOneDriveApi(Account account, TextWriter log)
+        /// <summary>
+        /// Connect to the OneDrive API and organize the contents of the target folder
+        /// </summary>
+        /// <param name="account"></param>
+        /// <param name="log"></param>
+        /// <returns></returns>
+        private static async Task OrganizePhotosInAccount(Account account, TextWriter log)
         {
             OneDriveClient client = new OneDriveClient(OneDriveApiRootUrl, account, CachedHttpProvider);
             IChildrenCollectionPage response = null;
+
+            await log.WriteLineAsync("Connecting to OneDrive...");
             try
             {
                 var specialFolderName = account.SourceFolder;
                 var childrenRequest = client.Drive.Special[specialFolderName].Children.Request();
                 response = await childrenRequest.GetAsync();
+                await log.WriteFormattedLineAsync("Found {0} items in the collection", response.Count);
             }
             catch (Exception ex)
             {
-                log.WriteLine("Exception getting '" + account.SourceFolder + "' children: " + ex.ToString());
+                log.WriteFormattedLine("Exception getting '{0}' children: {1}", account.SourceFolder, ex.ToString());
+                return;
             }
 
-            if (null != response)
+            if (null == response)
             {
-                foreach (var item in response)
-                {
-                    string destinationFolder = null;
-                    if (null != item.Photo && null != item.Photo.TakenDateTime)
-                    {
-                        await log.WriteLineAsync("Processing photo: " + item.Name);
-                        destinationFolder = string.Format(account.SubfolderFormat, item.Photo.TakenDateTime.Value);
-                    }
-                    else if (null != item.Image && null != item.CreatedDateTime)
-                    {
-                        await log.WriteLineAsync("Processing image: " + item.Name);
-                        destinationFolder = string.Format(account.SubfolderFormat, item.CreatedDateTime.Value);
-                    }
-                    else
-                    {
-                        await log.WriteLineAsync("Skipped item: " + item.Name);
-                        continue;
-                    }
+                await log.WriteLineAsync("Response was null. Aborting.");
+                return;
+            }
 
-                    if (null != destinationFolder)
+            foreach (var item in response)
+            {
+                string destinationFolder = null;
+                await log.WriteFormattedLineAsync("Processing item: {0} [{1}]", item.Name, item.Id);
+
+                if (null != item.Photo && null != item.Photo.TakenDateTime)
+                {
+                    destinationFolder = string.Format(account.SubfolderFormat, item.Photo.TakenDateTime.Value);
+                    await log.WriteFormattedLineAsync("Moving photo {0} to {1}", item.Name, destinationFolder);
+                }
+                else if (null != item.FileSystemInfo && null != item.FileSystemInfo.CreatedDateTime)
+                {
+                    destinationFolder = string.Format(account.SubfolderFormat, item.FileSystemInfo.CreatedDateTime.Value);
+                    await log.WriteFormattedLineAsync("Moving file {0} to {1} (based on clientCreatedDateTime)", item.Name, destinationFolder);
+                }
+                else if (null != item.CreatedDateTime)
+                {
+                    destinationFolder = string.Format(account.SubfolderFormat, item.CreatedDateTime.Value);
+                    await log.WriteFormattedLineAsync("Moving file {0} to {1} (based on createdDateTime)", item.Name, destinationFolder);
+                }
+                else
+                {
+                    await log.WriteFormattedLineAsync("Skipped item {0}", item.Name);
+                    continue;
+                }
+
+                if (null != destinationFolder)
+                {
+                    account.PhotosOrganized += 1;
+                    var patchedItem = new Item { ParentReference = new ItemReference { Path = Path.Combine(item.ParentReference.Path, destinationFolder) } };
+
+                    await log.WriteFormattedLineAsync("Patching item [{0}] with new parentReference: {1}", item.Id, patchedItem.ParentReference);
+
+                    try
                     {
-                        account.PhotosOrganized += 1;
-                        var patchedItem = new Item { ParentReference = new ItemReference { Path = item.ParentReference.Path + "/" + destinationFolder } };
-                        try
-                        {
-                            await client.Drive.Items[item.Id].Request().UpdateAsync(patchedItem);
-                        }
-                        catch (OneDriveException ex)
-                        {
-                            log.WriteLine("Exception thrown: " + ex.ToString());
-                        }
+                        await client.Drive.Items[item.Id].Request().UpdateAsync(patchedItem);
+                    }
+                    catch (OneDriveException ex)
+                    {
+                        log.WriteFormattedLine("Exception thrown: {0}", ex.ToString());
                     }
                 }
             }

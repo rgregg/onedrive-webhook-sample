@@ -22,7 +22,7 @@
             <p>Account owner: <asp:Label runat="server" ID="labelAccountDisplayName"></asp:Label></p>
             <p>ID: <asp:Label runat="server" ID="labelAccountId"></asp:Label></p>
             <p>Photos organized: <asp:Label runat="server" ID="labelPhotosOrganizedCount"></asp:Label></p>
-            <p>Webhooks Received: <asp:Label runat="server" ID="labelWebhooksReceived"></asp:Label></p>
+            <p>Webhooks processed: <asp:Label runat="server" ID="labelWebhooksReceived"></asp:Label></p>
             <p>Folder Format: <asp:TextBox runat="server" ID="textBoxFolderFormatString"></asp:TextBox></p>
             <p>Source Folder: <asp:TextBox runat="server" ID="textBoxSourceFolder"></asp:TextBox></p>
             <p><asp:CheckBox runat="server" ID="checkBoxEnableAccount" Text="Enable Moving Items (unchecked we'll just count webhooks received)" /></p>
