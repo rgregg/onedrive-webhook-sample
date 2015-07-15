@@ -93,6 +93,8 @@ namespace PhotoOrganizerWebJob
                 {
                     AccountLocker.ReleaseLock(account.Id);
                 }
+
+                await log.WriteFormattedLineAsync("Processing completed for account: {0}", account.Id);
             }
 
         }
