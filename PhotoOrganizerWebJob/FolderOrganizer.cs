@@ -104,11 +104,12 @@ namespace PhotoOrganizerWebJob
         /// </summary>
         /// <param name="item"></param>
         /// <returns></returns>
-        private bool ShouldMoveItem(Item item, Item sourceFolder)
+        private bool ShouldMoveItem(Item item, Item sourceFolder, out string reason)
         {
             // Only move files, skip everything else
             if (null == item.File)
             {
+                reason = "File was null";
                 return false;
             }
             
@@ -116,9 +117,11 @@ namespace PhotoOrganizerWebJob
             // to move things that aren't in the root of the source folder.
             if (item.ParentReference.Id != sourceFolder.Id)
             {
+                reason = "ParentReference.Id != sourceFolder.Id";
                 return false;
             }
 
+            reason = null;
             return true;
         }
 
@@ -132,10 +135,11 @@ namespace PhotoOrganizerWebJob
         {
             foreach (var item in items)
             {
-                if (!ShouldMoveItem(item, sourceFolder))
+                string skippedReason;
+                if (!ShouldMoveItem(item, sourceFolder, out skippedReason))
                 {
                     // skip folders, we don't want to move them
-                    WriteLog("Skipping item: {0}", item.Name);
+                    WriteLog("Skipping item '{0}': {1}", item.Name, skippedReason);
                     continue;
                 }
 

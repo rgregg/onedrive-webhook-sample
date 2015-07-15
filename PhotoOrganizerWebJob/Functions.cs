@@ -72,13 +72,18 @@ namespace PhotoOrganizerWebJob
                     OneDriveClient client = new OneDriveClient(OneDriveApiRootUrl, account, CachedHttpProvider);
                     FolderOrganizer organizer = new FolderOrganizer(client, account, log);
                     if (WebJobConfig.Default.UseViewChanges)
+                    {
                         await organizer.OrganizeSourceFolderItemChangesAsync();
+                    }
                     else
+                    {
                         await organizer.OrganizeSourceFolderChildrenAsync();
+                    }
 
                     // Record that we received another webhook and save the account back to table storage
                     account.WebhooksReceived += 1;
                     await AzureStorage.UpdateAccountAsync(account);
+                    await log.WriteFormattedLineAsync("Updated account {0} with hooks received: {1}", account.Id, account.WebhooksReceived);
                 }
                 catch (Exception ex)
                 {
