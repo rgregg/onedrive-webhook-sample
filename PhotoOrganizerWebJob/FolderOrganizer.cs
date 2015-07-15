@@ -154,7 +154,14 @@ namespace PhotoOrganizerWebJob
                 }
                 catch (OneDriveException ex)
                 {
-                    WriteLog("Unable to move file {0}: {1}", item.Name, ex);
+                    if (ex.IsMatchCode(OneDriveErrorCode.NameAlreadyExists))
+                    {
+                        WriteLog("File {0} already exists in {1}. Need to rename.", item.Name, destinationPath);
+                    }
+                    else
+                    {
+                        WriteLog("Unable to move file {0}: {1}", item.Name, ex);
+                    }
                 }
             }
         }

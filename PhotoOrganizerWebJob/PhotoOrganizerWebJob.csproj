@@ -116,6 +116,7 @@
   <ItemGroup>
     <Compile Include="FolderOrganizer.cs" />
     <Compile Include="KeyedLock.cs" />
+    <Compile Include="OneDriveExtensionMethods.cs" />
     <Compile Include="WebJobConfig.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Functions.cs" />
