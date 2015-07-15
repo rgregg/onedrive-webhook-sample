@@ -50,6 +50,8 @@ namespace PhotoOrganizerShared.Utility
             get;
         }
 
+        bool UseViewChanges { get; }
+
         string AzureStorageConnectionString { get; }
 
     }

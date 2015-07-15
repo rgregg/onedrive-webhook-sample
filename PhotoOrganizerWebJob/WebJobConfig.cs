@@ -69,5 +69,6 @@ namespace PhotoOrganizerWebJob
 
         public string AzureStorageConnectionString { get { return ConfigurationManager.ConnectionStrings["AzureWebJobsStorage"].ConnectionString; } }
 
+        public bool UseViewChanges { get { return Convert.ToBoolean(ConfigurationManager.AppSettings["UseViewChanges"]); } }
     }
 }

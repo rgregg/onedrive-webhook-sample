@@ -67,7 +67,8 @@ namespace CameraRollOrganizer
         }
 
         public string AzureStorageConnectionString { get { return ConfigurationManager.ConnectionStrings["StorageConnectionString"].ConnectionString; } }
-        
+
+        public bool UseViewChanges { get { return Convert.ToBoolean(ConfigurationManager.AppSettings["UseViewChanges"]); } }
 
     }
 }

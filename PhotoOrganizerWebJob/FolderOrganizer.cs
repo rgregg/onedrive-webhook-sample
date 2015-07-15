@@ -75,7 +75,11 @@ namespace PhotoOrganizerWebJob
             while (null != pagedResponse)
             {
                 await MoveItemsAsync(pagedResponse.CurrentPage, sourceFolderItem);
-                pagedResponse = await GetResponsePageAsync(pagedResponse.NextPageRequest);
+
+                var nextRequest = pagedResponse.NextPageRequest;
+                //_account.SyncToken = pagedResponse.ChangesToken;
+
+                pagedResponse = await GetResponsePageAsync(nextRequest);
             }
 
             _account.PhotosOrganized += _itemsOrganized;
@@ -140,7 +144,7 @@ namespace PhotoOrganizerWebJob
                     continue;
 
                 WriteLog("Moving item {0} to folder {1}", item.Name, destinationPath);
-                var destination = await ResolveDestinationFolderAsync(destinationPath);
+                var destination = await ResolveDestinationFolderAsync(destinationPath, sourceFolder);
 
                 var patchedItemUpdate = new Item { ParentReference = new ItemReference { Id = destination.Id } };
                 try
@@ -161,14 +165,14 @@ namespace PhotoOrganizerWebJob
         /// </summary>
         /// <param name="path"></param>
         /// <returns></returns>
-        private async Task<Item> ResolveDestinationFolderAsync(string path)
+        private async Task<Item> ResolveDestinationFolderAsync(string path, Item sourceFolder)
         {
             Item destinationItem;
             if (_cachedFolders.TryGetValue(path, out destinationItem))
                 return destinationItem;
 
             var emptyFolderPlaceholder = new Item { Folder = new Folder() };
-            destinationItem = await SourceFolder.ItemWithPath(path).Request().UpdateAsync(emptyFolderPlaceholder);
+            destinationItem = await _client.Drive.Items[sourceFolder.Id].ItemWithPath(path).Request().UpdateAsync(emptyFolderPlaceholder);
             if (null != destinationItem)
             {
                 _cachedFolders[path] = destinationItem;
