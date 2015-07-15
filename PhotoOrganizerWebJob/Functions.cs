@@ -96,6 +96,10 @@ namespace PhotoOrganizerWebJob
 
                 await log.WriteFormattedLineAsync("Processing completed for account: {0}", account.Id);
             }
+            else
+            {
+                await log.WriteFormattedLineAsync("Failed to acquire lock for account. Another thread is already processing updates for this account.");
+            }
 
         }
 
