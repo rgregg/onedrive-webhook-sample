@@ -19,8 +19,14 @@ namespace PhotoOrganizerWebJob
         private static readonly IHttpProvider CachedHttpProvider = new HttpProvider(new Serializer());
         private static KeyedLock AccountLocker = new KeyedLock();
 
-        // This function will get triggered/executed when a new message is written 
-        // on an Azure Queue called queue.
+        /// <summary>
+        /// This method is automatically exuected by the Azure SDK whenever a new item is added to the queue named
+        /// "subscriptions" -- it parses the queue message, finds the associated account, and then kicks off
+        /// the webhook processing job.
+        /// </summary>
+        /// <param name="message"></param>
+        /// <param name="log"></param>
+        /// <returns></returns>
         public static async Task ProcessQueueMessage([QueueTrigger("subscriptions")] string message, TextWriter log)
         {
             log.WriteLine(message);
@@ -34,7 +40,6 @@ namespace PhotoOrganizerWebJob
             }
 
             await log.WriteFormattedLineAsync("Processing webhook for user: {0}", userId);
-            
 
             var account = await AzureStorage.LookupAccountAsync(userId);
             if (null == account)
@@ -43,18 +48,34 @@ namespace PhotoOrganizerWebJob
                 return;
             }
 
-            await RunJobForAccount(account, log);
+            try
+            {
+                await WebhookActionForAccount(account, log);
+            }
+            catch (Exception ex)
+            {
+                log.WriteFormattedLine("Error while running job for account {0}: {1}", account.Id, ex);
+            }
         }
 
-        public static async Task RunJobForAccount(Account account, TextWriter log)
+        public static async Task WebhookActionForAccount(Account account, TextWriter log)
         {
-            account.WebhooksReceived += 1;
+            // Acquire a simple lock to ensure that only one thread is processing 
+            // an account at the same time to avoid concurrency issues.
+            // NOTE: If the web job is running on multiple VMs, this will not be sufficent to
+            // ensure errors don't occur from one account being processed multiple times.
             bool acquiredLock = AccountLocker.TryAcquireLock(account.Id);
             if (acquiredLock && account.Enabled)
             {
                 try
                 {
-                    await OrganizePhotosInAccount(account, log);
+                    OneDriveClient client = new OneDriveClient(OneDriveApiRootUrl, account, CachedHttpProvider);
+                    FolderOrganizer organizer = new FolderOrganizer(client, account, log);
+                    await organizer.OrganizeSourceFolderItemChangesAsync();
+
+                    // Record that we received another webhook and save the account back to table storage
+                    account.WebhooksReceived += 1;
+                    await AzureStorage.UpdateAccountAsync(account);
                 }
                 catch (Exception ex)
                 {
@@ -65,89 +86,8 @@ namespace PhotoOrganizerWebJob
                     AccountLocker.ReleaseLock(account.Id);
                 }
             }
-            await AzureStorage.UpdateAccountAsync(account);
+
         }
 
-        /// <summary>
-        /// Connect to the OneDrive API and organize the contents of the target folder
-        /// </summary>
-        /// <param name="account"></param>
-        /// <param name="log"></param>
-        /// <returns></returns>
-        private static async Task OrganizePhotosInAccount(Account account, TextWriter log)
-        {
-            OneDriveClient client = new OneDriveClient(OneDriveApiRootUrl, account, CachedHttpProvider);
-            IChildrenCollectionPage response = null;
-
-            await log.WriteLineAsync("Connecting to OneDrive...");
-            try
-            {
-                var specialFolderName = account.SourceFolder;
-                var childrenRequest = client.Drive.Special[specialFolderName].Children.Request();
-                response = await childrenRequest.GetAsync();
-                await log.WriteFormattedLineAsync("Found {0} items in the collection", response.Count);
-            }
-            catch (Exception ex)
-            {
-                log.WriteFormattedLine("Exception getting '{0}' children: {1}", account.SourceFolder, ex.ToString());
-                return;
-            }
-
-            if (null == response)
-            {
-                await log.WriteLineAsync("Response was null. Aborting.");
-                return;
-            }
-
-            foreach (var item in response)
-            {
-                string destinationFolder = null;
-                await log.WriteFormattedLineAsync("Processing item: {0} [{1}]", item.Name, item.Id);
-
-                if (item.Folder != null)
-                    continue;
-
-                if (null != item.Photo && null != item.Photo.TakenDateTime)
-                {
-                    destinationFolder = string.Format(account.SubfolderFormat, item.Photo.TakenDateTime.Value);
-                    await log.WriteFormattedLineAsync("Moving photo {0} to {1}", item.Name, destinationFolder);
-                }
-                else if (null != item.FileSystemInfo && null != item.FileSystemInfo.CreatedDateTime)
-                {
-                    destinationFolder = string.Format(account.SubfolderFormat, item.FileSystemInfo.CreatedDateTime.Value);
-                    await log.WriteFormattedLineAsync("Moving file {0} to {1} (based on clientCreatedDateTime)", item.Name, destinationFolder);
-                }
-                else if (null != item.CreatedDateTime)
-                {
-                    destinationFolder = string.Format(account.SubfolderFormat, item.CreatedDateTime.Value);
-                    await log.WriteFormattedLineAsync("Moving file {0} to {1} (based on createdDateTime)", item.Name, destinationFolder);
-                }
-                else
-                {
-                    await log.WriteFormattedLineAsync("Skipped item {0}", item.Name);
-                    continue;
-                }
-
-                if (null != destinationFolder)
-                {
-                    account.PhotosOrganized += 1;
-                    await log.WriteFormattedLineAsync("Patching item [{0}] with new destination folder: {1}", item.Id, destinationFolder);
-
-                    try
-                    {
-                        // Ensure that this folder exists already
-                        var destinationFolderItem = await client.Drive.Items[item.ParentReference.Id].ItemWithPath(destinationFolder).Request().UpdateAsync(new Item { Folder = new Folder() });
-
-                        var patchedItem = new Item { ParentReference = new ItemReference() { Id = destinationFolderItem.Id } };
-
-                        await client.Drive.Items[item.Id].Request().UpdateAsync(patchedItem);
-                    }
-                    catch (OneDriveException ex)
-                    {
-                        log.WriteFormattedLine("Exception thrown: {0}", ex.ToString());
-                    }
-                }
-            }
-        }
     }
 }

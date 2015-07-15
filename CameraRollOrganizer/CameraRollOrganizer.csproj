@@ -125,7 +125,7 @@
   <ItemGroup>
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Config.cs" />
-    <Compile Include="ContentResponseEx.cs" />
+    <Compile Include="ContentResponse.cs" />
     <Compile Include="Controllers\ActionController.cs" />
     <Compile Include="Controllers\AuthorizationController.cs" />
     <Compile Include="Controllers\WebhookController.cs" />
@@ -146,7 +146,7 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
-    <Compile Include="RedirectResponseEx.cs" />
+    <Compile Include="RedirectResponse.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="packages.config" />

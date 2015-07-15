@@ -37,7 +37,7 @@ namespace CameraRollOrganizer.Controllers
         }
 
         [HttpGet, Route("api/action/subscriptions")]
-        public async Task<IHttpActionResult> Subscriptions(string path = "/Apps/Webhook%20Sample")
+        public async Task<IHttpActionResult> Subscriptions(string path)
         {
             var cookies = Request.Headers.GetCookies("session").FirstOrDefault();
             if (cookies == null)
@@ -57,13 +57,15 @@ namespace CameraRollOrganizer.Controllers
                 return JsonResponseEx.Create(HttpStatusCode.InternalServerError, new { message = "Error getting access_token" });
             }
 
-            var request = HttpWebRequest.CreateHttp("https://storage.live.com/MyData/LiveFolders/" + path + "?NotificationSubscriptions");
+            if (null == path) path = string.Empty;
+
+            var request = HttpWebRequest.CreateHttp("https://storage.live.com/MyData/" + path + "?NotificationSubscriptions");
             request.Headers.Add("Authorization", "Bearer " + accessToken);
 
             var response = await request.GetResponseAsync();
             var stream = response.GetResponseStream();
 
-            return ContentResponseEx.Create(HttpStatusCode.OK, stream, "text/xml");
+            return ContentResponse.Create(HttpStatusCode.OK, stream, "text/xml");
         }
 
         internal static PhotoOrganizerShared.Models.OneDriveWebhook LastWebhookReceived { get; set; }

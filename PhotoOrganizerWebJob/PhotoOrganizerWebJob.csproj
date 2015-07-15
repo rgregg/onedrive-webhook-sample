@@ -114,6 +114,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="FolderOrganizer.cs" />
     <Compile Include="KeyedLock.cs" />
     <Compile Include="WebJobConfig.cs" />
     <Compile Include="Program.cs" />

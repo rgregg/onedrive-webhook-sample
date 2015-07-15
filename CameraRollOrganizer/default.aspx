@@ -21,10 +21,10 @@
         <asp:Panel runat="server" ID="panelLoggedIn" Visible="false">
             <p>Account owner: <asp:Label runat="server" ID="labelAccountDisplayName"></asp:Label></p>
             <p>ID: <asp:Label runat="server" ID="labelAccountId"></asp:Label></p>
-            <p>Photos organized: <asp:Label runat="server" ID="labelPhotosOrganizedCount"></asp:Label></p>
+            <p>Files organized: <asp:Label runat="server" ID="labelPhotosOrganizedCount"></asp:Label></p>
             <p>Webhooks processed: <asp:Label runat="server" ID="labelWebhooksReceived"></asp:Label></p>
-            <p>Folder Format: <asp:TextBox runat="server" ID="textBoxFolderFormatString"></asp:TextBox></p>
-            <p>Source Folder: <asp:TextBox runat="server" ID="textBoxSourceFolder"></asp:TextBox></p>
+            <p>Folder Format (date format string): <asp:TextBox runat="server" ID="textBoxFolderFormatString"></asp:TextBox></p>
+            <p>Source Special Folder ID (approot or cameraroll): <asp:TextBox runat="server" ID="textBoxSourceFolder"></asp:TextBox></p>
             <p><asp:CheckBox runat="server" ID="checkBoxEnableAccount" Text="Enable Moving Items (unchecked we'll just count webhooks received)" /></p>
             <p><asp:Button runat="server" ID="buttonSaveChanges" Text="Save Changes" OnClick="buttonSaveChanges_Click" /></p>
             
@@ -32,7 +32,7 @@
 
             <p><a href="/signout">Sign Out</a></p>
             <p><a href="/api/action/createfile" target="_blank">Create Test File</a></p>
-            <p><a href="/api/action/subscriptions?path=Apps/webhook%20sample"  target="_blank">View subscriptions</a></p>
+            <p><a href="/api/action/subscriptions?path=jump/apps/webhook%20sample"  target="_blank">View subscriptions</a></p>
         </asp:Panel>
     </div>
     </form>

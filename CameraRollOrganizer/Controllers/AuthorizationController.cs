@@ -58,7 +58,7 @@ namespace CameraRollOrganizer.Controllers
 
             var authCookie = CookieForAccount(existingAccount);
 
-            return RedirectResponseEx.Create("/default.aspx", authCookie);
+            return RedirectResponse.Create("/default.aspx", authCookie);
         }
 
 
