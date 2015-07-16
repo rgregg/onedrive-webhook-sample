@@ -24,6 +24,10 @@
                 your photos organized for you! Whenever new files are added to your Camera Roll folder in 
                 OneDrive, we'll automatically move them into a folder based on the date the photo was taken. 
                 Files that don't have a date taken won't be moved.</p>
+
+            <p>Note: Right now while we're testing this stuff, we're only messing around with files in the 
+                <i>/Apps/Webhook Sample</i> folder. No pre-release harm will come to your camera roll. Feel free to 
+                drop files into the <i>Webhook Sample</i> folder and see what happens!</p>
             
             <h3>Configuration</h3>
             <p>You can change the way camera roll organizer works on your account. These changes only apply
