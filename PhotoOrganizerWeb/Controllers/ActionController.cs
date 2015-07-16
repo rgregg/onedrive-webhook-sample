@@ -24,7 +24,7 @@ namespace CameraRollOrganizer.Controllers
                 return JsonResponseEx.Create(HttpStatusCode.Unauthorized, new { message = "Session cookie is missing." });
             }
             var sessionCookieValue = cookies["session"].Values;
-            var account = await AuthorizationController.AccountFromCookie(sessionCookieValue);
+            var account = await AuthorizationController.AccountFromCookie(sessionCookieValue, false);
             if (null == account)
             {
                 return JsonResponseEx.Create(HttpStatusCode.Unauthorized, new { message = "Failed to locate an account for the auth cookie." });
@@ -45,7 +45,7 @@ namespace CameraRollOrganizer.Controllers
                 return JsonResponseEx.Create(HttpStatusCode.Unauthorized, new { message = "Session cookie is missing." });
             }
             var sessionCookieValue = cookies["session"].Values;
-            var account = await AuthorizationController.AccountFromCookie(sessionCookieValue);
+            var account = await AuthorizationController.AccountFromCookie(sessionCookieValue, false);
             if (null == account)
             {
                 return JsonResponseEx.Create(HttpStatusCode.Unauthorized, new { message = "Failed to locate an account for the auth cookie." });

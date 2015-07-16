@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Configuration;
-using Microsoft.WindowsAzure.Storage.Table;
-using System.Threading.Tasks;
+﻿using Microsoft.WindowsAzure.Storage.Table;
 using PhotoOrganizerShared.Utility;
+using System;
+using System.Threading.Tasks;
 
 namespace PhotoOrganizerShared.Models
 {

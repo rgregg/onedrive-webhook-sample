@@ -93,13 +93,18 @@ namespace CameraRollOrganizer.Controllers
             if (null == sessionCookie) 
                 return null;
 
-            return await AccountFromCookie(sessionCookie.Values);
+            return await AccountFromCookie(sessionCookie.Values, true);
         }
 
-        public static async Task<Account> AccountFromCookie(NameValueCollection storedCookieValue)
+        public static async Task<Account> AccountFromCookie(NameValueCollection storedCookieValue, bool shouldDecode)
         {
             string accountId = null;
-            string encryptedAccountId = HttpUtility.UrlDecode(storedCookieValue["id"]);
+            string encryptedAccountId = storedCookieValue["id"];
+            if (shouldDecode && null != encryptedAccountId)
+            {
+                encryptedAccountId = HttpUtility.UrlDecode(encryptedAccountId);
+            }
+
             if (null != encryptedAccountId)
             {
                 accountId = encryptedAccountId.Decrypt(WebAppConfig.Default.CookiePassword);

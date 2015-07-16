@@ -30,32 +30,6 @@ namespace PhotoOrganizerWebJob
         }
 
         /// <summary>
-        /// Use the /children collection of the source folder to discover items that
-        /// need to be organized and move them according.
-        /// 
-        /// Updates the Account instance variable and expects it to be saved after the methods
-        /// has returned.
-        /// </summary>
-        /// <returns></returns>
-        public async Task OrganizeSourceFolderChildrenAsync()
-        {
-            Item sourceFolderItem = await GetSourceFolderAsync();
-            if (null == sourceFolderItem)
-                return;
-            
-            IChildrenCollectionRequest firstPageRequest = SourceFolder.Children.Request();
-            //var response = await _client.Drive.Root.ItemChanges("").Request().GetAsync();
-            IChildrenCollectionPage pagedResponse = await GetResponsePageAsync(firstPageRequest);
-            while (null != pagedResponse)
-            {
-                await MoveItemsAsync(pagedResponse.CurrentPage, sourceFolderItem);
-                pagedResponse = await GetResponsePageAsync(pagedResponse.NextPageRequest);
-            }
-
-            _account.PhotosOrganized += _itemsOrganized;
-        }
-
-        /// <summary>
         /// Use the view.changes method to get a list of changes that should be processed
         /// and organize those items accordingly into child folders.
         /// 
@@ -71,15 +45,47 @@ namespace PhotoOrganizerWebJob
 
             IItemChangesRequest firstPageRequest = SourceFolder.ItemChanges(_account.SyncToken).Request();
 
-            IItemCollectionPage pagedResponse = await GetResponsePageAsync(firstPageRequest);
+            IItemChangesCollectionPage pagedResponse = null;
+            try
+            {
+                pagedResponse = await firstPageRequest.GetAsync();
+            }
+            catch (OneDriveException ex)
+            {
+                _log.WriteFormattedLine("Error making first request to service: {0}", ex);
+                return;
+            }
+
             while (null != pagedResponse)
             {
+                // Check to see if we need to reset our sync token
+                if (pagedResponse.AdditionalData.ContainsKey("@changes.resync"))
+                {
+                    // Need to clear the sync token and start over again
+                    _account.SyncToken = null;
+                    await OrganizeSourceFolderItemChangesAsync();
+                    return;
+                }
+                else
+                {
+                    // Save the current sync token for later
+                    _account.SyncToken = pagedResponse.AdditionalData["@changes.token"] as string;
+                }
+
+                // Process the items in this page
                 await MoveItemsAsync(pagedResponse.CurrentPage, sourceFolderItem);
 
+                // Retrieve the next page of results
                 var nextRequest = pagedResponse.NextPageRequest;
-                //_account.SyncToken = pagedResponse.ChangesToken;
-
-                pagedResponse = await GetResponsePageAsync(nextRequest);
+                try
+                {
+                    pagedResponse = await nextRequest.GetAsync();
+                }
+                catch (OneDriveException ex)
+                {
+                    _log.WriteFormattedLine("Error making request to service: {0}", ex);
+                    pagedResponse = null;
+                }
             }
 
             _account.PhotosOrganized += _itemsOrganized;
@@ -228,83 +234,7 @@ namespace PhotoOrganizerWebJob
         }
 
 
-        #region get paged responses for various types of requests
-        /// <summary>
-        /// Catch any errors that occur getting a response page from the service and 
-        /// report out to the logger.
-        /// </summary>
-        /// <param name="request"></param>
-        /// <returns></returns>
-        private async Task<IChildrenCollectionPage> GetResponsePageAsync(IChildrenCollectionRequest request)
-        {
-            if (request == null)
-            {
-                return null;
-            }
-
-            try
-            {
-                return await request.GetAsync();
-            }
-            catch (OneDriveException ex)
-            {
-                WriteLog("Error retriving children collection [{1}]: {0}", ex);
-            }
-
-            return null;
-        }
-
-        /// <summary>
-        /// Catch any errors that occur getting a response page from the service and 
-        /// report out to the logger.
-        /// </summary>
-        /// <param name="request"></param>
-        /// <returns></returns>
-        private async Task<IItemCollectionPage> GetResponsePageAsync(IItemChangesRequest request)
-        {
-            if (request == null)
-            {
-                return null;
-            }
-
-            try
-            {
-                return await request.GetAsync();
-            }
-            catch (OneDriveException ex)
-            {
-                WriteLog("Error retriving children collection [{1}]: {0}", ex);
-            }
-
-            return null;
-        }
-
-        /// <summary>
-        /// Catch any errors that occur getting a response page from the service and 
-        /// report out to the logger.
-        /// </summary>
-        /// <param name="request"></param>
-        /// <returns></returns>
-        private async Task<IItemCollectionPage> GetResponsePageAsync(IItemCollectionRequest request)
-        {
-            if (request == null)
-            {
-                return null;
-            }
-
-            try
-            {
-                return await request.GetAsync();
-            }
-            catch (OneDriveException ex)
-            {
-                WriteLog("Error retriving children collection [{1}]: {0}", ex);
-            }
-
-            return null;
-        }
-        #endregion
-
+       
         #region Logging Methods
 
         private void WriteLog(string format, object value)
