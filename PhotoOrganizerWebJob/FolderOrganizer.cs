@@ -75,15 +75,23 @@ namespace PhotoOrganizerWebJob
                 // Process the items in this page
                 await MoveItemsAsync(pagedResponse.CurrentPage, sourceFolderItem);
 
-                // Retrieve the next page of results
-                var nextRequest = pagedResponse.NextPageRequest;
-                try
+                // TODO: use @changes.hasMoreChanges instead to avoid an extra round trip
+                // Retrieve the next page of results, if we got non-zero results back
+                if (pagedResponse.CurrentPage.Count > 0)
                 {
-                    pagedResponse = await nextRequest.GetAsync();
+                    var nextRequest = pagedResponse.NextPageRequest;
+                    try
+                    {
+                        pagedResponse = await nextRequest.GetAsync();
+                    }
+                    catch (OneDriveException ex)
+                    {
+                        _log.WriteFormattedLine("Error making request to service: {0}", ex);
+                        pagedResponse = null;
+                    }
                 }
-                catch (OneDriveException ex)
+                else
                 {
-                    _log.WriteFormattedLine("Error making request to service: {0}", ex);
                     pagedResponse = null;
                 }
             }
