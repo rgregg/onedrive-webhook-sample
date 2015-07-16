@@ -26,7 +26,7 @@
                 Files that don't have a date taken won't be moved.</p>
 
             <p>Note: Right now while we're testing this stuff, we're only messing around with files in the 
-                <i>/Apps/Webhook Sample</i> folder. No pre-release harm will come to your camera roll. Feel free to 
+                <a href="https://onedrive.live.com/?id=apps"><i>/Apps/Webhook Sample</i></a> folder. No pre-release harm will come to your camera roll. Feel free to 
                 drop files into the <i>Webhook Sample</i> folder and see what happens!</p>
             
             <h3>Configuration</h3>
