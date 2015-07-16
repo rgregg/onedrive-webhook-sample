@@ -59,14 +59,14 @@ namespace PhotoOrganizerWebJob
             while (null != pagedResponse)
             {
                 // Check to see if we need to reset our sync token
-                if (pagedResponse.AdditionalData.ContainsKey("@changes.resync"))
+                if (null != pagedResponse.AdditionalData && pagedResponse.AdditionalData.ContainsKey("@changes.resync"))
                 {
                     // Need to clear the sync token and start over again
                     _account.SyncToken = null;
                     await OrganizeSourceFolderItemChangesAsync();
                     return;
                 }
-                else
+                else if (null != pagedResponse.AdditionalData)
                 {
                     // Save the current sync token for later
                     _account.SyncToken = pagedResponse.AdditionalData["@changes.token"] as string;
