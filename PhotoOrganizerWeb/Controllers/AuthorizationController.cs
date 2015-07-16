@@ -76,7 +76,6 @@ namespace CameraRollOrganizer.Controllers
         {
             var nv = new NameValueCollection();
             nv["id"] = null != account ? account.Id.Encrypt(WebAppConfig.Default.CookiePassword) : "";
-            //nv["token"] = null != account ? account.AccessToken.Encrypt(Config.CookiePassword) : "";
 
             var cookie = new CookieHeaderValue("session", nv);
             //cookie.Secure = true;

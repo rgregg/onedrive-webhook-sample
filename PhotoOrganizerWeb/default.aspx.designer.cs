@@ -58,33 +58,6 @@ namespace CameraRollOrganizer {
         protected global::System.Web.UI.WebControls.Label labelAccountDisplayName;
         
         /// <summary>
-        /// labelAccountId control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label labelAccountId;
-        
-        /// <summary>
-        /// labelPhotosOrganizedCount control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label labelPhotosOrganizedCount;
-        
-        /// <summary>
-        /// labelWebhooksReceived control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label labelWebhooksReceived;
-        
-        /// <summary>
         /// textBoxFolderFormatString control.
         /// </summary>
         /// <remarks>
@@ -128,5 +101,23 @@ namespace CameraRollOrganizer {
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Label labelErrors;
+        
+        /// <summary>
+        /// labelPhotosOrganizedCount control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label labelPhotosOrganizedCount;
+        
+        /// <summary>
+        /// labelWebhooksReceived control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label labelWebhooksReceived;
     }
 }

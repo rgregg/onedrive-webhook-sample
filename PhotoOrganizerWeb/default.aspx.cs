@@ -37,7 +37,6 @@ namespace CameraRollOrganizer
                     panelNoCurrentUser.Visible = false;
 
                     labelAccountDisplayName.Text = account.DisplayName;
-                    labelAccountId.Text = account.Id;
                     labelPhotosOrganizedCount.Text = account.PhotosOrganized.ToString();
                     labelWebhooksReceived.Text = account.WebhooksReceived.ToString();
                     textBoxFolderFormatString.Text = account.SubfolderFormat;
