@@ -40,7 +40,6 @@ namespace CameraRollOrganizer
                     labelPhotosOrganizedCount.Text = account.PhotosOrganized.ToString();
                     labelWebhooksReceived.Text = account.WebhooksReceived.ToString();
                     textBoxFolderFormatString.Text = account.SubfolderFormat;
-                    textBoxSourceFolder.Text = account.SourceFolder;
                     checkBoxEnableAccount.Checked = account.Enabled;
                 }
             }
@@ -78,7 +77,6 @@ namespace CameraRollOrganizer
                     updateAccount.SubfolderFormat = textBoxFolderFormatString.Text;
 
                 updateAccount.Enabled = checkBoxEnableAccount.Checked;
-                updateAccount.SourceFolder = textBoxSourceFolder.Text;
                 await AzureStorage.UpdateAccountAsync(updateAccount);
             }
         }

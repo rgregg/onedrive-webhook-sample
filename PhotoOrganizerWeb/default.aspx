@@ -26,15 +26,19 @@
                 Files that don't have a date taken won't be moved.</p>
 
             <p>Note: Right now while we're testing this stuff, we're only messing around with files in the 
-                <a href="https://onedrive.live.com/?id=apps"><i>/Apps/Webhook Sample</i></a> folder. No pre-release harm will come to your camera roll. Feel free to 
-                drop files into the <i>Webhook Sample</i> folder and see what happens!</p>
+                <a href="https://onedrive.live.com/?id=apps" target="_blank"><i>/Apps/Webhook Sample</i></a> 
+                folder. No pre-release harm will come to your camera roll. Feel free to drop files into the 
+                <i>Webhook Sample</i> folder and see what happens! If you don't have this folder, 
+                <a href="/api/action/createfile" target="_blank">click here to create it</a>.</p>
             
             <h3>Configuration</h3>
             <p>You can change the way camera roll organizer works on your account. These changes only apply
                 to items not already organized.</p>
-            <p>Destination Folder Name: <asp:TextBox runat="server" ID="textBoxFolderFormatString" Width="200px"></asp:TextBox></p>
-            <p>Source Special Folder ID (approot or cameraroll): <asp:TextBox runat="server" ID="textBoxSourceFolder"></asp:TextBox></p>
-            <p><asp:CheckBox runat="server" ID="checkBoxEnableAccount" Text="Enable Organization" /></p>
+            <p>Destination Folder Name: <asp:TextBox runat="server" ID="textBoxFolderFormatString" Width="200px"></asp:TextBox><br />
+                <small>This is passed into String.Format(format, DateTimeOfFile), so you can use {0} or {0:format} to customize the folder names.</small>
+            </p>
+
+            <p><asp:CheckBox runat="server" ID="checkBoxEnableAccount" Text="Enable File Moves" /></p>
             <p><asp:Button runat="server" ID="buttonSaveChanges" Text="Save Changes" OnClick="buttonSaveChanges_Click" /></p>
             <asp:Label runat="server" ID="labelErrors" ForeColor="Red" Text=""></asp:Label>
 
@@ -44,8 +48,7 @@
 
             <h3>Commands</h3>
             <p><a href="/signout">Sign Out</a></p>
-            <p><a href="/api/action/createfile" target="_blank">Create Test File</a></p>
-            <p><a href="/api/action/subscriptions?path=jump/apps/webhook%20sample"  target="_blank">View subscriptions</a></p>
+            <p><a href="/api/action/subscriptions?path=jump/apps/webhook%20sample"  target="_blank">View existing subscriptions</a></p>
         </asp:Panel>
     </div>
     </form>
