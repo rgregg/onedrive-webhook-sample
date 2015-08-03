@@ -75,7 +75,6 @@ namespace PhotoOrganizerWebJob
                 // Process the items in this page
                 await MoveItemsAsync(pagedResponse.CurrentPage, sourceFolderItem);
 
-                // TODO: use @changes.hasMoreChanges instead to avoid an extra round trip
                 // Retrieve the next page of results, if we got non-zero results back
                 if (pagedResponse.CurrentPage.Count > 0)
                 {
