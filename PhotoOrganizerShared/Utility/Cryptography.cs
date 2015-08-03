@@ -10,21 +10,20 @@ namespace PhotoOrganizerShared.Utility
     /// </summary>
     public static class Cryptography
     {
-        #region Settings
-
         private static int _iterations = 2;
         private static int _keySize = 256;
 
         private static string _hash = "SHA1";
+        
+        //TODO: Change the salt and vector constants if you use this outside of the sample code.
         private static string _salt = "Pbe5JE580DfN2bpg"; // Random 16 ASCII characters
         private static string _vector = "uW7PWgTQzVnk2U5g"; // Random 16 ASCII characters
-
-        #endregion
 
         public static string Encrypt(this string value, string password)
         {
             return Encrypt<AesManaged>(value, password);
         }
+
         public static string Encrypt<T>(this string value, string password)
                 where T : SymmetricAlgorithm, new()
         {
@@ -62,6 +61,7 @@ namespace PhotoOrganizerShared.Utility
         {
             return Decrypt<AesManaged>(value, password);
         }
+
         public static string Decrypt<T>(this string value, string password) where T : SymmetricAlgorithm, new()
         {
             byte[] vectorBytes = GetBytes<ASCIIEncoding>(_vector);
