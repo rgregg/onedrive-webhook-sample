@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Web.Http;
 
-namespace CameraRollOrganizer.Utility
+namespace PhotoOrganizerWeb.Utility
 {
     internal class JsonResponseEx : IHttpActionResult
     {

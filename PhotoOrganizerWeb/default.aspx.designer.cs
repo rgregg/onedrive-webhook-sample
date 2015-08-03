@@ -7,7 +7,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace CameraRollOrganizer {
+namespace PhotoOrganizerWeb {
     
     
     public partial class _default {

@@ -1,4 +1,4 @@
-﻿using CameraRollOrganizer.Utility;
+﻿using PhotoOrganizerWeb.Utility;
 using Microsoft.OneDrive.Sdk;
 using PhotoOrganizerShared;
 using PhotoOrganizerShared.Models;
@@ -15,8 +15,10 @@ using System.Web;
 using System.Web.Http;
 using System.Web.Http.Results;
 
-namespace CameraRollOrganizer.Controllers
+namespace PhotoOrganizerWeb.Controllers
 {
+    using PhotoOrganizerWeb.Utility;
+
     public class AuthorizationController : ApiController
     {
 

@@ -1,4 +1,4 @@
-﻿using CameraRollOrganizer.Utility;
+﻿using PhotoOrganizerWeb.Utility;
 using PhotoOrganizerShared;
 using PhotoOrganizerShared.Utility;
 using System;
@@ -10,7 +10,7 @@ using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 
-namespace CameraRollOrganizer
+namespace PhotoOrganizerWeb
 {
     public partial class _default : System.Web.UI.Page
     {

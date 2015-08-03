@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Web.Http;
 
-namespace CameraRollOrganizer
+namespace PhotoOrganizerWeb
 {
     internal class RedirectResponse : IHttpActionResult
     {

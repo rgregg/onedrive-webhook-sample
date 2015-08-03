@@ -1,4 +1,4 @@
-﻿using CameraRollOrganizer.Utility;
+﻿using PhotoOrganizerWeb.Utility;
 using Microsoft.OneDrive.Sdk;
 using Newtonsoft.Json;
 using PhotoOrganizerShared.Utility;
@@ -11,8 +11,10 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
 
-namespace CameraRollOrganizer.Controllers
+namespace PhotoOrganizerWeb.Controllers
 {
+    using PhotoOrganizerWeb.Utility;
+
     public class ActionController : ApiController
     {
         [HttpGet, Route("api/action/createfile")]

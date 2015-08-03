@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Web.Http;
 
-namespace CameraRollOrganizer.Controllers
+namespace PhotoOrganizerWeb.Controllers
 {
     public class WebhookController : ApiController
     {
