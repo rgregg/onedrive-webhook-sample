@@ -80,7 +80,7 @@ namespace PhotoOrganizerWeb.Controllers
             nv["id"] = null != account ? account.Id.Encrypt(WebAppConfig.Default.CookiePassword) : "";
 
             var cookie = new CookieHeaderValue("session", nv);
-            //cookie.Secure = true;
+            cookie.Secure = true;
             cookie.HttpOnly = true;
             cookie.Expires = null != account ? DateTimeOffset.Now.AddMinutes(120) : DateTimeOffset.Now;
             cookie.Path = "/";
