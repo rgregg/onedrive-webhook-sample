@@ -12,10 +12,10 @@ using Microsoft.OneDrive.Sdk;
 
 namespace PhotoOrganizerWebJob
 {
+    using PhotoOrganizerShared.Utility;
+
     public class Functions
     {
-        private const string OneDriveApiRootUrl = "https://api.onedrive.com/v1.0";
-
         private static readonly IHttpProvider CachedHttpProvider = new HttpProvider(new Serializer());
         private static KeyedLock AccountLocker = new KeyedLock();
 
@@ -69,7 +69,7 @@ namespace PhotoOrganizerWebJob
             {
                 try
                 {
-                    OneDriveClient client = new OneDriveClient(OneDriveApiRootUrl, account, CachedHttpProvider);
+                    OneDriveClient client = new OneDriveClient(SharedConfig.Default.OneDriveBaseUrl, account, CachedHttpProvider);
                     FolderOrganizer organizer = new FolderOrganizer(client, account, log);
                     await organizer.OrganizeSourceFolderItemChangesAsync();
 
