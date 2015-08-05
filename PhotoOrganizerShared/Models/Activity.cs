@@ -11,11 +11,11 @@
 
     public class Activity : TableEntity
     {
-        internal const string DateTimeOffsetFormat = "u";
+        internal const string DateTimeOffsetFormat = "o";
 
         public Activity()
         {
-            this.RowKey = DateTimeOffset.UtcNow.ToString(DateTimeOffsetFormat);
+            this.RowKey = DateTime.UtcNow.ToString(DateTimeOffsetFormat);
             this.Type = ActivityEventCode.MessageLogged;
         }
 
@@ -28,11 +28,18 @@
             set { this.PartitionKey = value; }
         }
 
-        public DateTimeOffset EventDateUtc
+        public DateTime EventDateUtc
         {
             get
             {
-                return DateTimeOffset.ParseExact(this.RowKey, DateTimeOffsetFormat, DateTimeFormatInfo.InvariantInfo);
+                try
+                {
+                    return DateTime.Parse(this.RowKey, null, DateTimeStyles.RoundtripKind);
+                }
+                catch
+                {
+                    return DateTime.MinValue;
+                }
             }
         }
 
