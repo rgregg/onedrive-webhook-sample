@@ -64,7 +64,7 @@ namespace PhotoOrganizerWeb.Controllers
         }
 
         [HttpGet, Route("api/action/activity")]
-        public async Task<IHttpActionResult> RecentActivity(string cid)
+        public async Task<IHttpActionResult> RecentActivity(string cid = null)
         {
             var cookies = Request.Headers.GetCookies("session").FirstOrDefault();
             if (cookies == null)
