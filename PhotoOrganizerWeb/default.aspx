@@ -49,6 +49,7 @@
             <h3>Commands</h3>
             <p><a href="/signout">Sign Out</a></p>
             <p><a href="/api/action/subscriptions?path=jump/apps/webhook%20sample"  target="_blank">View existing subscriptions</a></p>
+            <p><a href="/api/action/activity">See account activity</a></p>
         </asp:Panel>
     </div>
     </form>

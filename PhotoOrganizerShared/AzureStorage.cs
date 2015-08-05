@@ -78,7 +78,7 @@ namespace PhotoOrganizerShared
 
         public static async Task<List<Activity>> RecentActivityAsync(string userId)
         {
-            string TweleveHoursAgo = DateTimeOffset.UtcNow.Subtract(new TimeSpan(12, 0, 0)).ToString(Activity.DateTimeOffsetFormat);
+            string TweleveHoursAgo = DateTime.UtcNow.Subtract(new TimeSpan(12, 0, 0)).ToString(Activity.DateTimeOffsetFormat);
 
             TableQuery<Activity> rangeQuery = new TableQuery<Activity>().Where(TableQuery.CombineFilters(
                 TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, userId),
