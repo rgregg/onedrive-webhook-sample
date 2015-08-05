@@ -73,7 +73,8 @@ namespace PhotoOrganizerWebJob
                         new Activity
                         {
                             UserId = account.Id,
-                            Type = Activity.ActivityEventCode.LookingForChanges
+                            Type = Activity.ActivityEventCode.LookingForChanges,
+                            Message = "Looking for Changes"
                         });
                     
                     await log.WriteFormattedLineAsync("Connecting to OneDrive...");
@@ -86,7 +87,8 @@ namespace PhotoOrganizerWebJob
                         new Activity
                         {
                             UserId = account.Id,
-                            Type = Activity.ActivityEventCode.AccountProcessed
+                            Type = Activity.ActivityEventCode.AccountProcessed,
+                            Message = "Account processed."
                         });
 
                     // Record that we received another webhook and save the account back to table storage
