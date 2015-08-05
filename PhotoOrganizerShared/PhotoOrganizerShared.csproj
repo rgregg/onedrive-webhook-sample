@@ -90,6 +90,7 @@
   <ItemGroup>
     <Compile Include="AzureStorage.cs" />
     <Compile Include="Models\Account.cs" />
+    <Compile Include="Models\Activity.cs" />
     <Compile Include="Models\OneDriveNotification.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utility\IConfig.cs" />

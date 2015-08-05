@@ -14,6 +14,8 @@ using System.Web.Http;
 namespace PhotoOrganizerWeb.Controllers
 {
     using PhotoOrganizerWeb.Utility;
+    using PhotoOrganizerShared;
+    using PhotoOrganizerShared.Models;
 
     public class ActionController : ApiController
     {
@@ -34,6 +36,14 @@ namespace PhotoOrganizerWeb.Controllers
 
             OneDriveClient client = new OneDriveClient(WebAppConfig.Default.OneDriveBaseUrl, account, new HttpProvider(new Serializer()));
             var item = await client.Drive.Special[account.SourceFolder].ItemWithPath("test_file.txt").Content.Request().PutAsync<Item>(this.TestFileStream());
+
+            await AzureStorage.InsertActivityAsync(
+                new Activity
+                {
+                    UserId = account.Id,
+                    Type = Activity.ActivityEventCode.FileChanged,
+                    Message = string.Format("Creating test file test_file.txt with resource id: {0}", item.Id)
+                });
             
             return JsonResponseEx.Create(HttpStatusCode.OK, item);
         }
@@ -51,6 +61,25 @@ namespace PhotoOrganizerWeb.Controllers
             {
                 return NotFound();
             }
+        }
+
+        [HttpGet, Route("api/action/activity")]
+        public async Task<IHttpActionResult> RecentActivity()
+        {
+            var cookies = Request.Headers.GetCookies("session").FirstOrDefault();
+            if (cookies == null)
+            {
+                return JsonResponseEx.Create(HttpStatusCode.Unauthorized, new { message = "Session cookie is missing." });
+            }
+            var sessionCookieValue = cookies["session"].Values;
+            var account = await AuthorizationController.AccountFromCookie(sessionCookieValue, false);
+            if (null == account)
+            {
+                return JsonResponseEx.Create(HttpStatusCode.Unauthorized, new { message = "Failed to locate an account for the auth cookie." });
+            }
+            
+            var activity = await AzureStorage.RecentActivityAsync(account.Id);
+            return JsonResponseEx.Create(HttpStatusCode.OK, new { value = activity});
         }
 
         private Stream TestFileStream()

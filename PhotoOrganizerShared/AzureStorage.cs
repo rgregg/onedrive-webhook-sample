@@ -19,7 +19,9 @@ namespace PhotoOrganizerShared
         private static CloudTable AccountTable { get; set; }
 
         private static CloudQueue SubscriptionQueue { get; set; }
-        
+
+        private static CloudTable ActivityTable { get; set; }
+
 
         static AzureStorage()
         {
@@ -36,10 +38,12 @@ namespace PhotoOrganizerShared
             AccountTable = tableClient.GetTableReference("account");
             AccountTable.CreateIfNotExists();
 
+            ActivityTable = tableClient.GetTableReference("activity");
+            ActivityTable.CreateIfNotExists();
+
             CloudQueueClient queueClient = StorageAccount.CreateCloudQueueClient();
             SubscriptionQueue = queueClient.GetQueueReference("subscriptions");
             SubscriptionQueue.CreateIfNotExists();
-
         }
 
 
@@ -62,6 +66,29 @@ namespace PhotoOrganizerShared
             TableOperation updateOperation = TableOperation.InsertOrReplace(account);
             await AccountTable.ExecuteAsync(updateOperation);
         }
+        #endregion
+
+        #region Activity Table
+
+        public static async Task InsertActivityAsync(Activity activity)
+        {
+            TableOperation insertOperation = TableOperation.Insert(activity);
+            await ActivityTable.ExecuteAsync(insertOperation);
+        }
+
+        public static async Task<List<Activity>> RecentActivityAsync(string userId)
+        {
+            string TweleveHoursAgo = DateTimeOffset.UtcNow.Subtract(new TimeSpan(12, 0, 0)).ToString(Activity.DateTimeOffsetFormat);
+
+            TableQuery<Activity> rangeQuery = new TableQuery<Activity>().Where(TableQuery.CombineFilters(
+                TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, userId),
+                TableOperators.And,
+                TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.GreaterThanOrEqual, TweleveHoursAgo)));
+
+            var responses = ActivityTable.ExecuteQuery(rangeQuery);
+            return responses.ToList();
+        }
+
         #endregion
 
         #region Subscription Queue

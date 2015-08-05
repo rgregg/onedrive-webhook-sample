@@ -25,6 +25,16 @@ namespace PhotoOrganizerWeb.Controllers
             {
                 try
                 {
+                    // Record the activity of receiving the webhook
+                    await AzureStorage.InsertActivityAsync(
+                            new Activity
+                            {
+                                UserId = notification.UserId,
+                                Type = Activity.ActivityEventCode.WebhookReceived,
+                                Message = Newtonsoft.Json.JsonConvert.SerializeObject(notification)
+                            });
+
+                    // Enqueue an action to process this account again
                     await AzureStorage.AddToPendingSubscriptionQueueAsync(notification);
                 }
                 catch (Exception ex)

@@ -69,10 +69,25 @@ namespace PhotoOrganizerWebJob
             {
                 try
                 {
+                    await AzureStorage.InsertActivityAsync(
+                        new Activity
+                        {
+                            UserId = account.Id,
+                            Type = Activity.ActivityEventCode.LookingForChanges
+                        });
+                    
                     await log.WriteFormattedLineAsync("Connecting to OneDrive...");
                     OneDriveClient client = new OneDriveClient(SharedConfig.Default.OneDriveBaseUrl, account, CachedHttpProvider);
                     FolderOrganizer organizer = new FolderOrganizer(client, account, log);
                     await organizer.OrganizeSourceFolderItemChangesAsync();
+
+                    // Record the account activity
+                    await AzureStorage.InsertActivityAsync(
+                        new Activity
+                        {
+                            UserId = account.Id,
+                            Type = Activity.ActivityEventCode.AccountProcessed
+                        });
 
                     // Record that we received another webhook and save the account back to table storage
                     account.WebhooksReceived += 1;
