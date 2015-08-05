@@ -37,7 +37,7 @@ namespace PhotoOrganizerWeb.Controllers
             {
                 return JsonResponseEx.Create(HttpStatusCode.InternalServerError, new { message = "Invalid response from token service.", code = "tokenServiceNullResponse" });
             }
-            
+
             Account account = new Account(token);
             OneDriveClient client = new OneDriveClient(WebAppConfig.Default.OneDriveBaseUrl, account, new HttpProvider(new Serializer()));
 
@@ -80,7 +80,7 @@ namespace PhotoOrganizerWeb.Controllers
             nv["id"] = null != account ? account.Id.Encrypt(WebAppConfig.Default.CookiePassword) : "";
 
             var cookie = new CookieHeaderValue("session", nv);
-            //cookie.Secure = true;
+            cookie.Secure = true;
             cookie.HttpOnly = true;
             cookie.Expires = null != account ? DateTimeOffset.Now.AddMinutes(120) : DateTimeOffset.Now;
             cookie.Path = "/";
@@ -91,7 +91,7 @@ namespace PhotoOrganizerWeb.Controllers
         public static async Task<Account> AccountFromCookie(HttpCookieCollection cookies)
         {
             var sessionCookie = cookies["session"];
-            if (null == sessionCookie) 
+            if (null == sessionCookie)
                 return null;
 
             return await AccountFromCookie(sessionCookie.Values, true);
