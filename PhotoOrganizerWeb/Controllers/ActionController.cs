@@ -64,7 +64,7 @@ namespace PhotoOrganizerWeb.Controllers
         }
 
         [HttpGet, Route("api/action/activity")]
-        public async Task<IHttpActionResult> RecentActivity()
+        public async Task<IHttpActionResult> RecentActivity(string cid)
         {
             var cookies = Request.Headers.GetCookies("session").FirstOrDefault();
             if (cookies == null)
@@ -77,8 +77,8 @@ namespace PhotoOrganizerWeb.Controllers
             {
                 return JsonResponseEx.Create(HttpStatusCode.Unauthorized, new { message = "Failed to locate an account for the auth cookie." });
             }
-            
-            var activity = await AzureStorage.RecentActivityAsync(account.Id);
+
+            var activity = await AzureStorage.RecentActivityAsync(cid ?? account.Id);
             return JsonResponseEx.Create(HttpStatusCode.OK, new { value = activity});
         }
 
