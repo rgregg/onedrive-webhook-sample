@@ -23,7 +23,14 @@ namespace PhotoOrganizerWeb.Controllers
 
             foreach (var notification in webhook.Value)
             {
-                await AzureStorage.AddToPendingSubscriptionQueueAsync(notification);
+                try
+                {
+                    await AzureStorage.AddToPendingSubscriptionQueueAsync(notification);
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Trace.WriteLine("Exception adding the webhook to storage queue: " + ex.Message);
+                }
             }
             return Ok();
         }
