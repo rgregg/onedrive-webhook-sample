@@ -33,7 +33,7 @@ namespace PhotoOrganizerWeb.Utility
         public Task<HttpResponseMessage> ExecuteAsync(CancellationToken cancellationToken)
         {
             var response = new HttpResponseMessage(_statusCode);
-            response.Content = new StringContent(JsonConvert.SerializeObject(_bodyObject));
+            response.Content = new StringContent(JsonConvert.SerializeObject(_bodyObject, Formatting.Indented));
             response.Content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
 
             if (null != _cookie)

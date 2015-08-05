@@ -36,7 +36,12 @@
             }
         }
 
-        public ActivityEventCode Type { get; set; }
+        public string EventType { get; set; }
+
+        public ActivityEventCode Type
+        {
+            set { this.EventType = value.ToString(); }
+        }
 
         public string Message { get; set; }
 
