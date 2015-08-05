@@ -60,7 +60,8 @@
             FileChanged,
             WebhookReceived,
             AccountProcessed,
-            LookingForChanges
+            LookingForChanges,
+            FileMoved
         }
     }
 }

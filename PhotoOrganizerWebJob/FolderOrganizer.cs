@@ -1,4 +1,5 @@
 ﻿using Microsoft.OneDrive.Sdk;
+using PhotoOrganizerShared;
 using PhotoOrganizerShared.Models;
 using System;
 using System.Collections.Generic;
@@ -185,6 +186,16 @@ namespace PhotoOrganizerWebJob
                         WriteLog("Patching item {0} with parentReference.id = {1}", item.Name, destination.Id);
                         var movedItem = await _client.Drive.Items[item.Id].Request().UpdateAsync(patchedItemUpdate);
                         ++_itemsOrganized;
+
+                        // Record the account activity
+                        await AzureStorage.InsertActivityAsync(
+                            new Activity
+                            {
+                                UserId = _account.Id,
+                                Type = Activity.ActivityEventCode.FileMoved,
+                                Message = string.Format("Moved file {0} to path {1}", item.Id, destinationPath)
+                            });
+
                     }
                     catch (OneDriveException ex)
                     {
