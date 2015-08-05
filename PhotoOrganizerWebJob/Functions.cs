@@ -69,6 +69,7 @@ namespace PhotoOrganizerWebJob
             {
                 try
                 {
+                    await log.WriteFormattedLineAsync("Connecting to OneDrive...");
                     OneDriveClient client = new OneDriveClient(SharedConfig.Default.OneDriveBaseUrl, account, CachedHttpProvider);
                     FolderOrganizer organizer = new FolderOrganizer(client, account, log);
                     await organizer.OrganizeSourceFolderItemChangesAsync();

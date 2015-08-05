@@ -41,18 +41,22 @@ namespace PhotoOrganizerWebJob
         {
             Item sourceFolderItem = await GetSourceFolderAsync();
             if (null == sourceFolderItem)
+            {
+                WriteLog("No source folder was returned. Exiting.");
                 return;
+            }
 
+            WriteLog("Requesting view.changes with token {0}", _account.SyncToken);
             IItemChangesRequest firstPageRequest = SourceFolder.ItemChanges(_account.SyncToken).Request();
-
             IItemChangesCollectionPage pagedResponse = null;
             try
             {
+                WriteLog("Requesting page of changes...");
                 pagedResponse = await firstPageRequest.GetAsync();
             }
             catch (OneDriveException ex)
             {
-                _log.WriteFormattedLine("Error making first request to service: {0}", ex);
+                WriteLog("Error making first request to service: {0}", ex);
                 return;
             }
 
@@ -62,6 +66,7 @@ namespace PhotoOrganizerWebJob
                 if (null != pagedResponse.AdditionalData && pagedResponse.AdditionalData.ContainsKey("@changes.resync"))
                 {
                     // Need to clear the sync token and start over again
+                    WriteLog("Service requests a resync. Need to restart with a null sync token: {0}", pagedResponse.AdditionalData["@changes.resync"]);
                     _account.SyncToken = null;
                     await OrganizeSourceFolderItemChangesAsync();
                     return;
@@ -70,7 +75,10 @@ namespace PhotoOrganizerWebJob
                 {
                     // Save the current sync token for later
                     _account.SyncToken = pagedResponse.AdditionalData["@changes.token"] as string;
+                    WriteLog("Received new sync token: {0}", _account.SyncToken);
                 }
+
+                WriteLog("Response page includes {0} items.", pagedResponse.CurrentPage.Count);
 
                 // Process the items in this page
                 await MoveItemsAsync(pagedResponse.CurrentPage, sourceFolderItem);
@@ -78,6 +86,7 @@ namespace PhotoOrganizerWebJob
                 // Retrieve the next page of results, if we got non-zero results back
                 if (pagedResponse.CurrentPage.Count > 0)
                 {
+                    WriteLog("Requesting next page of view.changes...");
                     var nextRequest = pagedResponse.NextPageRequest;
                     try
                     {
@@ -85,12 +94,13 @@ namespace PhotoOrganizerWebJob
                     }
                     catch (OneDriveException ex)
                     {
-                        _log.WriteFormattedLine("Error making request to service: {0}", ex);
+                        WriteLog("Error making request to service: {0}", ex);
                         pagedResponse = null;
                     }
                 }
                 else
                 {
+                    WriteLog("No results, so we're at the end of the list.");
                     pagedResponse = null;
                 }
             }
@@ -103,6 +113,7 @@ namespace PhotoOrganizerWebJob
             Item sourceFolderItem = null;
             try
             {
+                WriteLog("Requesting source folder...");
                 sourceFolderItem = await SourceFolder.Request().GetAsync();
             }
             catch (OneDriveException ex)
@@ -146,6 +157,7 @@ namespace PhotoOrganizerWebJob
         /// <returns></returns>
         private async Task MoveItemsAsync(IList<Item> items, Item sourceFolder)
         {
+            WriteLog("Moving items from the current page...");
             foreach (var item in items)
             {
                 string skippedReason;
@@ -158,26 +170,32 @@ namespace PhotoOrganizerWebJob
 
                 string destinationPath = ComputeDestinationPath(item);
                 if (string.IsNullOrEmpty(destinationPath))
+                {
+                    WriteLog("Destination path was null, skipping file: {0}", item.Name);
                     continue;
+                }
 
                 WriteLog("Moving item {0} to folder {1}", item.Name, destinationPath);
                 var destination = await ResolveDestinationFolderAsync(destinationPath, sourceFolder);
-
-                var patchedItemUpdate = new Item { ParentReference = new ItemReference { Id = destination.Id } };
-                try
+                if (null != destination)
                 {
-                    var movedItem = await _client.Drive.Items[item.Id].Request().UpdateAsync(patchedItemUpdate);
-                    ++_itemsOrganized;
-                }
-                catch (OneDriveException ex)
-                {
-                    if (ex.IsMatchCode(OneDriveErrorCode.NameAlreadyExists))
+                    var patchedItemUpdate = new Item { ParentReference = new ItemReference { Id = destination.Id } };
+                    try
                     {
-                        WriteLog("File {0} already exists in {1}. Need to rename.", item.Name, destinationPath);
+                        WriteLog("Patching item {0} with parentReference.id = {1}", item.Name, destination.Id);
+                        var movedItem = await _client.Drive.Items[item.Id].Request().UpdateAsync(patchedItemUpdate);
+                        ++_itemsOrganized;
                     }
-                    else
+                    catch (OneDriveException ex)
                     {
-                        WriteLog("Unable to move file {0}: {1}", item.Name, ex);
+                        if (ex.IsMatchCode(OneDriveErrorCode.NameAlreadyExists))
+                        {
+                            WriteLog("File {0} already exists in {1}. Need to rename.", item.Name, destinationPath);
+                        }
+                        else
+                        {
+                            WriteLog("Unable to move file {0}: {1}", item.Name, ex);
+                        }
                     }
                 }
             }
@@ -193,15 +211,31 @@ namespace PhotoOrganizerWebJob
         {
             Item destinationItem;
             if (_cachedFolders.TryGetValue(path, out destinationItem))
-                return destinationItem;
-
-            var emptyFolderPlaceholder = new Item { Folder = new Folder() };
-            destinationItem = await _client.Drive.Items[sourceFolder.Id].ItemWithPath(path).Request().UpdateAsync(emptyFolderPlaceholder);
-            if (null != destinationItem)
             {
-                _cachedFolders[path] = destinationItem;
+                return destinationItem;
             }
-            return destinationItem;
+
+            WriteLog("Creating destination folder {0}...", path);
+            var emptyFolderPlaceholder = new Item { Folder = new Folder() };
+            try
+            {
+                destinationItem =
+                    await
+                        _client.Drive.Items[sourceFolder.Id].ItemWithPath(path)
+                            .Request()
+                            .UpdateAsync(emptyFolderPlaceholder);
+                if (null != destinationItem)
+                {
+                    _cachedFolders[path] = destinationItem;
+                }
+                return destinationItem;
+            }
+            catch (Exception ex)
+            {
+                WriteLog("Error creating folder: {0}", ex.Message);
+            }
+
+            return null;
         }
 
         /// <summary>
