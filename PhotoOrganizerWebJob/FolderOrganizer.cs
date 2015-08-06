@@ -16,18 +16,18 @@ namespace PhotoOrganizerWebJob
     /// </summary>
     internal class FolderOrganizer
     {
-        private readonly OneDriveClient _client;
-        private readonly Account _account;
-        private readonly TextWriter _log;
-        private readonly Dictionary<string, Item> _cachedFolders = new Dictionary<string, Item>();
+        private readonly OneDriveClient client;
+        private readonly Account account;
+        private readonly TextWriter log;
+        private readonly Dictionary<string, Item> cachedFolders = new Dictionary<string, Item>();
 
-        private int _itemsOrganized;
+        private int itemsOrganized;
 
         public FolderOrganizer(OneDriveClient client, Account account, TextWriter log)
         {
-            _client = client;
-            _account = account;
-            _log = log;
+            this.client = client;
+            this.account = account;
+            this.log = log;
         }
 
         /// <summary>
@@ -37,28 +37,28 @@ namespace PhotoOrganizerWebJob
         /// Updates the Account provided to this instance and expects it to be persisted when
         /// this method returns.
         /// </summary>
-        /// <returns></returns>
-        public async Task OrganizeSourceFolderItemChangesAsync()
+        /// <returns>The number of items that were processed</returns>
+        public async Task<long> OrganizeSourceFolderItemChangesAsync()
         {
-            Item sourceFolderItem = await GetSourceFolderAsync();
+            Item sourceFolderItem = await this.GetSourceFolderAsync();
             if (null == sourceFolderItem)
             {
-                WriteLog("No source folder was returned. Exiting.");
-                return;
+                this.WriteLog("No source folder was returned. Exiting.");
+                return 0;
             }
 
-            WriteLog("Requesting view.changes with token {0}", _account.SyncToken);
-            IItemChangesRequest firstPageRequest = SourceFolder.ItemChanges(_account.SyncToken).Request();
+            this.WriteLog("Requesting view.changes with token {0}", this.account.SyncToken);
+            IItemChangesRequest firstPageRequest = this.SourceFolder.ItemChanges(this.account.SyncToken).Request();
             IItemChangesCollectionPage pagedResponse = null;
             try
             {
-                WriteLog("Requesting page of changes...");
+                this.WriteLog("Requesting page of changes...");
                 pagedResponse = await firstPageRequest.GetAsync();
             }
             catch (OneDriveException ex)
             {
-                WriteLog("Error making first request to service: {0}", ex);
-                return;
+                this.WriteLog("Error making first request to service: {0}", ex);
+                return 0;
             }
 
             while (null != pagedResponse)
@@ -67,27 +67,27 @@ namespace PhotoOrganizerWebJob
                 if (null != pagedResponse.AdditionalData && pagedResponse.AdditionalData.ContainsKey("@changes.resync"))
                 {
                     // Need to clear the sync token and start over again
-                    WriteLog("Service requests a resync. Need to restart with a null sync token: {0}", pagedResponse.AdditionalData["@changes.resync"]);
-                    _account.SyncToken = null;
-                    await OrganizeSourceFolderItemChangesAsync();
-                    return;
+                    this.WriteLog("Service requests a resync. Need to restart with a null sync token: {0}", pagedResponse.AdditionalData["@changes.resync"]);
+                    this.account.SyncToken = null;
+                    return await this.OrganizeSourceFolderItemChangesAsync();
                 }
-                else if (null != pagedResponse.AdditionalData)
+                
+                if (null != pagedResponse.AdditionalData)
                 {
                     // Save the current sync token for later
-                    _account.SyncToken = pagedResponse.AdditionalData["@changes.token"] as string;
-                    WriteLog("Received new sync token: {0}", _account.SyncToken);
+                    this.account.SyncToken = pagedResponse.AdditionalData["@changes.token"] as string;
+                    this.WriteLog("Received new sync token: {0}", this.account.SyncToken);
                 }
 
-                WriteLog("Response page includes {0} items.", pagedResponse.CurrentPage.Count);
+                this.WriteLog("Response page includes {0} items.", pagedResponse.CurrentPage.Count);
 
                 // Process the items in this page
-                await MoveItemsAsync(pagedResponse.CurrentPage, sourceFolderItem);
+                await this.MoveItemsAsync(pagedResponse.CurrentPage, sourceFolderItem);
 
                 // Retrieve the next page of results, if we got non-zero results back
                 if (pagedResponse.CurrentPage.Count > 0)
                 {
-                    WriteLog("Requesting next page of view.changes...");
+                    this.WriteLog("Requesting next page of view.changes...");
                     var nextRequest = pagedResponse.NextPageRequest;
                     try
                     {
@@ -95,18 +95,19 @@ namespace PhotoOrganizerWebJob
                     }
                     catch (OneDriveException ex)
                     {
-                        WriteLog("Error making request to service: {0}", ex);
+                        this.WriteLog("Error making request to service: {0}", ex);
                         pagedResponse = null;
                     }
                 }
                 else
                 {
-                    WriteLog("No results, so we're at the end of the list.");
+                    this.WriteLog("No results, so we're at the end of the list.");
                     pagedResponse = null;
                 }
             }
 
-            _account.PhotosOrganized += _itemsOrganized;
+            this.account.PhotosOrganized += this.itemsOrganized;
+            return this.itemsOrganized;
         }
 
         private async Task<Item> GetSourceFolderAsync()
@@ -114,12 +115,12 @@ namespace PhotoOrganizerWebJob
             Item sourceFolderItem = null;
             try
             {
-                WriteLog("Requesting source folder...");
-                sourceFolderItem = await SourceFolder.Request().GetAsync();
+                this.WriteLog("Requesting source folder...");
+                sourceFolderItem = await this.SourceFolder.Request().GetAsync();
             }
             catch (OneDriveException ex)
             {
-                WriteLog("Unable to get source folder: {0}", ex);
+                this.WriteLog("Unable to get source folder: {0}", ex);
             }
             return sourceFolderItem;
         }
@@ -158,40 +159,40 @@ namespace PhotoOrganizerWebJob
         /// <returns></returns>
         private async Task MoveItemsAsync(IList<Item> items, Item sourceFolder)
         {
-            WriteLog("Moving items from the current page...");
+            this.WriteLog("Moving items from the current page...");
             foreach (var item in items)
             {
                 string skippedReason;
-                if (!ShouldMoveItem(item, sourceFolder, out skippedReason))
+                if (!this.ShouldMoveItem(item, sourceFolder, out skippedReason))
                 {
                     // skip folders, we don't want to move them
-                    WriteLog("Skipping item '{0}': {1}", item.Name, skippedReason);
+                    this.WriteLog("Skipping item '{0}': {1}", item.Name, skippedReason);
                     continue;
                 }
 
-                string destinationPath = ComputeDestinationPath(item);
+                string destinationPath = this.ComputeDestinationPath(item);
                 if (string.IsNullOrEmpty(destinationPath))
                 {
-                    WriteLog("Destination path was null, skipping file: {0}", item.Name);
+                    this.WriteLog("Destination path was null, skipping file: {0}", item.Name);
                     continue;
                 }
 
-                WriteLog("Moving item {0} to folder {1}", item.Name, destinationPath);
-                var destination = await ResolveDestinationFolderAsync(destinationPath, sourceFolder);
+                this.WriteLog("Moving item {0} to folder {1}", item.Name, destinationPath);
+                var destination = await this.ResolveDestinationFolderAsync(destinationPath, sourceFolder);
                 if (null != destination)
                 {
                     var patchedItemUpdate = new Item { ParentReference = new ItemReference { Id = destination.Id } };
                     try
                     {
-                        WriteLog("Patching item {0} with parentReference.id = {1}", item.Name, destination.Id);
-                        var movedItem = await _client.Drive.Items[item.Id].Request().UpdateAsync(patchedItemUpdate);
-                        ++_itemsOrganized;
+                        this.WriteLog("Patching item {0} with parentReference.id = {1}", item.Name, destination.Id);
+                        var movedItem = await this.client.Drive.Items[item.Id].Request().UpdateAsync(patchedItemUpdate);
+                        ++this.itemsOrganized;
 
                         // Record the account activity
                         await AzureStorage.InsertActivityAsync(
                             new Activity
                             {
-                                UserId = _account.Id,
+                                UserId = this.account.Id,
                                 Type = Activity.ActivityEventCode.FileMoved,
                                 Message = string.Format("Moved file {0} to path {1}", item.Id, destinationPath)
                             });
@@ -201,11 +202,11 @@ namespace PhotoOrganizerWebJob
                     {
                         if (ex.IsMatchCode(OneDriveErrorCode.NameAlreadyExists))
                         {
-                            WriteLog("File {0} already exists in {1}. Need to rename.", item.Name, destinationPath);
+                            this.WriteLog("File {0} already exists in {1}. Need to rename.", item.Name, destinationPath);
                         }
                         else
                         {
-                            WriteLog("Unable to move file {0}: {1}", item.Name, ex);
+                            this.WriteLog("Unable to move file {0}: {1}", item.Name, ex);
                         }
                     }
                 }
@@ -221,29 +222,28 @@ namespace PhotoOrganizerWebJob
         private async Task<Item> ResolveDestinationFolderAsync(string path, Item sourceFolder)
         {
             Item destinationItem;
-            if (_cachedFolders.TryGetValue(path, out destinationItem))
+            if (this.cachedFolders.TryGetValue(path, out destinationItem))
             {
                 return destinationItem;
             }
 
-            WriteLog("Creating destination folder {0}...", path);
+            this.WriteLog("Creating destination folder {0}...", path);
             var emptyFolderPlaceholder = new Item { Folder = new Folder() };
             try
             {
                 destinationItem =
-                    await
-                        _client.Drive.Items[sourceFolder.Id].ItemWithPath(path)
+                    await this.client.Drive.Items[sourceFolder.Id].ItemWithPath(path)
                             .Request()
                             .UpdateAsync(emptyFolderPlaceholder);
                 if (null != destinationItem)
                 {
-                    _cachedFolders[path] = destinationItem;
+                    this.cachedFolders[path] = destinationItem;
                 }
                 return destinationItem;
             }
             catch (Exception ex)
             {
-                WriteLog("Error creating folder: {0}", ex.Message);
+                this.WriteLog("Error creating folder: {0}", ex.Message);
             }
 
             return null;
@@ -259,22 +259,22 @@ namespace PhotoOrganizerWebJob
         {
             if (null != item.Photo && null != item.Photo.TakenDateTime)
             {
-                WriteLog("Using Photo.TakenDateTime for date");
-                return string.Format(_account.SubfolderFormat, item.Photo.TakenDateTime);
+                this.WriteLog("Using Photo.TakenDateTime for date");
+                return string.Format(this.account.SubfolderFormat, item.Photo.TakenDateTime);
             }
             else if (null != item.FileSystemInfo && null != item.FileSystemInfo.CreatedDateTime)
             {
-                WriteLog("Using FileSystemInfo.CreatedDateTime for date");
-                return string.Format(_account.SubfolderFormat, item.FileSystemInfo.CreatedDateTime);
+                this.WriteLog("Using FileSystemInfo.CreatedDateTime for date");
+                return string.Format(this.account.SubfolderFormat, item.FileSystemInfo.CreatedDateTime);
             }
             else if (null != item.CreatedDateTime)
             {
-                WriteLog("Using Item.CreatedDateTime for date");
-                return string.Format(_account.SubfolderFormat, item.CreatedDateTime);
+                this.WriteLog("Using Item.CreatedDateTime for date");
+                return string.Format(this.account.SubfolderFormat, item.CreatedDateTime);
             }
             else
             {
-                WriteLog("No date value available.");
+                this.WriteLog("No date value available.");
                 return null;
             }
 
@@ -282,7 +282,7 @@ namespace PhotoOrganizerWebJob
 
         private IItemRequestBuilder SourceFolder
         {
-            get { return _client.Drive.Special[_account.SourceFolder]; }
+            get { return this.client.Drive.Special[this.account.SourceFolder]; }
         }
 
 
@@ -291,18 +291,37 @@ namespace PhotoOrganizerWebJob
 
         private void WriteLog(string format, object value)
         {
-            if (null != _log)
+            if (null != this.log)
             {
-                _log.WriteFormattedLine(format, value);
+                this.log.WriteFormattedLine(format, value);
             }
+
+            var t = AzureStorage.InsertActivityAsync(
+                new Activity
+                {
+                    UserId = this.account.Id,
+                    Type = Activity.ActivityEventCode.MessageLogged,
+                    Message =
+                        string.Format(format, value)
+                });
+            t.Wait();
         }
 
         private void WriteLog(string format, params object[] values)
         {
-            if (null != _log)
+            if (null != this.log)
             {
-                _log.WriteFormattedLine(format, values);
+                this.log.WriteFormattedLine(format, values);
             }
+
+            var t = AzureStorage.InsertActivityAsync(
+                new Activity
+                {
+                    UserId = this.account.Id,
+                    Type = Activity.ActivityEventCode.MessageLogged,
+                    Message = string.Format(format, values)
+                });
+            t.Wait();
         }
 
         #endregion

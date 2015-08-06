@@ -1,17 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Azure.WebJobs;
-using System.Web;
-using PhotoOrganizerShared;
-using PhotoOrganizerShared.Models;
-using Microsoft.OneDrive.Sdk;
-
-namespace PhotoOrganizerWebJob
+﻿namespace PhotoOrganizerWebJob
 {
+    using System;
+    using System.IO;
+    using System.Threading.Tasks;
+    using System.Web;
+    using Microsoft.Azure.WebJobs;
+    using Microsoft.OneDrive.Sdk;
+    using PhotoOrganizerShared;
+    using PhotoOrganizerShared.Models;
     using PhotoOrganizerShared.Utility;
 
     public class Functions
@@ -27,7 +23,7 @@ namespace PhotoOrganizerWebJob
         /// <param name="message"></param>
         /// <param name="log"></param>
         /// <returns></returns>
-        public static async Task ProcessQueueMessage([QueueTrigger("subscriptions")] string message, TextWriter log)
+        public static async Task ProcessQueueMessageAsync([QueueTrigger("subscriptions")] string message, TextWriter log)
         {
             log.WriteLine(message);
 
@@ -50,7 +46,7 @@ namespace PhotoOrganizerWebJob
 
             try
             {
-                await WebhookActionForAccount(account, log);
+                await WebhookActionForAccountAsync(account, log);
             }
             catch (Exception ex)
             {
@@ -58,7 +54,7 @@ namespace PhotoOrganizerWebJob
             }
         }
 
-        public static async Task WebhookActionForAccount(Account account, TextWriter log)
+        public static async Task WebhookActionForAccountAsync(Account account, TextWriter log)
         {
             // Acquire a simple lock to ensure that only one thread is processing 
             // an account at the same time to avoid concurrency issues.
@@ -74,13 +70,17 @@ namespace PhotoOrganizerWebJob
                         {
                             UserId = account.Id,
                             Type = Activity.ActivityEventCode.LookingForChanges,
-                            Message = "Looking for Changes"
+                            Message = "Account lock acquired"
                         });
                     
                     await log.WriteFormattedLineAsync("Connecting to OneDrive...");
+                    
+                    // Build a new OneDriveClient with the account information
                     OneDriveClient client = new OneDriveClient(SharedConfig.Default.OneDriveBaseUrl, account, CachedHttpProvider);
+
+                    // Execute our organization class
                     FolderOrganizer organizer = new FolderOrganizer(client, account, log);
-                    await organizer.OrganizeSourceFolderItemChangesAsync();
+                    var countOfItems = await organizer.OrganizeSourceFolderItemChangesAsync();
 
                     // Record the account activity
                     await AzureStorage.InsertActivityAsync(
@@ -88,7 +88,8 @@ namespace PhotoOrganizerWebJob
                         {
                             UserId = account.Id,
                             Type = Activity.ActivityEventCode.AccountProcessed,
-                            Message = "Account processed."
+                            Message = "Account organization complete.",
+                            WorkItemCount =  countOfItems
                         });
 
                     // Record that we received another webhook and save the account back to table storage
