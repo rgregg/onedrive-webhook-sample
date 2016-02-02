@@ -12,7 +12,6 @@
 
     public class Functions
     {
-        private static readonly IHttpProvider CachedHttpProvider = new HttpProvider(new Serializer());
         private static KeyedLock AccountLocker = new KeyedLock();
 
         /// <summary>
@@ -76,7 +75,8 @@
                     await log.WriteFormattedLineAsync("Connecting to OneDrive...");
                     
                     // Build a new OneDriveClient with the account information
-                    OneDriveClient client = new OneDriveClient(SharedConfig.Default.OneDriveBaseUrl, account, CachedHttpProvider);
+                    OneDriveClient client = new OneDriveClient(SharedConfig.Default.OneDriveBaseUrl, account);
+                    var client = new OneDriveClient(
 
                     // Execute our organization class
                     FolderOrganizer organizer = new FolderOrganizer(client, account, log);

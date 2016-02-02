@@ -48,8 +48,8 @@ namespace PhotoOrganizerWebJob
             }
 
             this.WriteLog("Requesting view.changes with token {0}", this.account.SyncToken);
-            IItemChangesRequest firstPageRequest = this.SourceFolder.ItemChanges(this.account.SyncToken).Request();
-            IItemChangesCollectionPage pagedResponse = null;
+            IItemDeltaRequest firstPageRequest = this.SourceFolder.Delta(this.account.SyncToken).Request();
+            IItemDeltaCollectionPage pagedResponse = null;
             try
             {
                 this.WriteLog("Requesting page of changes...");

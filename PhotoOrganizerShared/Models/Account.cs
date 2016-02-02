@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace PhotoOrganizerShared.Models
 {
-    public class Account : TableEntity, Microsoft.OneDrive.Sdk.IAuthenticator
+    public class Account : TableEntity
     {
         private const string DefaultSubfolderFormatString = "Years/{0:yyyy/MM - MMMM}";
 
@@ -84,17 +84,7 @@ namespace PhotoOrganizerShared.Models
             throw new InvalidOperationException("Unable to authenticate. Need to sign-in again.");
         }
 
-        #region Properties that are in IAuthenticator that shouldn't be
-        public string[] Scopes { get; set; }
-
-        public DateTimeOffset? Expiration { get; set; }
-
-        public string ClientId { get; set; }
-
-        
-        #endregion
-
-        string Microsoft.OneDrive.Sdk.IAuthenticator.AccessToken
+        string AccessToken
         {
             get { return CachedAccessToken; }
             set { CachedAccessToken = value; } 
