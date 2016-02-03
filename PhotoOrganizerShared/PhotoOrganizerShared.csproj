@@ -83,7 +83,6 @@
     <Compile Include="Models\Activity.cs" />
     <Compile Include="Models\OneDriveNotification.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Utility\IConfig.cs" />
     <Compile Include="Utility\Cryptography.cs" />
     <Compile Include="Utility\OAuthHelper.cs" />
     <Compile Include="Utility\QueryStringBuilder.cs" />

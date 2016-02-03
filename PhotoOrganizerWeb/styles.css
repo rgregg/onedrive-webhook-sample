@@ -1,13 +1,7 @@
-﻿body {
-    font-family: sans-serif;
+﻿h3 {
+    padding: 4px;
 }
 
-p {
-    font-family: sans-serif;
-}
-
-h3 {
-    background-color: darkblue;
-    color: white;
-    padding: 4px 4px 4px 4px;
+a.ms-Button {
+    text-decoration: none;
 }

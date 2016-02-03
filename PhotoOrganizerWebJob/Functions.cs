@@ -58,9 +58,9 @@
             try
             {
                 return await OneDriveClient.GetSilentlyAuthenticatedMicrosoftAccountClient(
-                    SharedConfig.Default.MsaClientId,
-                    SharedConfig.Default.MsaRedirectionTarget,
-                    SharedConfig.Default.MsaClientScopes.Split(' '),
+                    SharedConfig.AppClientID,
+                    SharedConfig.RedirectUri,
+                    SharedConfig.Scopes,
                     account.RefreshToken);
 
             }

@@ -73,7 +73,7 @@ namespace PhotoOrganizerShared.Models
                 throw new InvalidOperationException("No refresh token available. Cannot authenticate.");
             }
 
-            OAuthHelper oauth = SharedConfig.Default.MicrosoftAccountOAuth();
+            OAuthHelper oauth = SharedConfig.MicrosoftAccountOAuth();
             var token = await oauth.RedeemRefreshTokenAsync(this.RefreshToken);
             if (null != token)
             {

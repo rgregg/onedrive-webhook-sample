@@ -27,10 +27,10 @@ namespace PhotoOrganizerWeb.Controllers
         {
             // Redeem authorization code for account information
 
-            OAuthHelper helper = new OAuthHelper(WebAppConfig.Default.MsaTokenService,
-                WebAppConfig.Default.MsaClientId,
-                WebAppConfig.Default.MsaClientSecret,
-                WebAppConfig.Default.MsaRedirectionTarget);
+            OAuthHelper helper = new OAuthHelper(SharedConfig.TokenService,
+                SharedConfig.AppClientID,
+                SharedConfig.AppClientSecret,
+                SharedConfig.RedirectUri);
 
             var token = await helper.RedeemAuthorizationCodeAsync(code);
             if (null == token)
@@ -67,9 +67,9 @@ namespace PhotoOrganizerWeb.Controllers
             try
             {
                 return await OneDriveClient.GetSilentlyAuthenticatedMicrosoftAccountClient(
-                    WebAppConfig.Default.MsaClientId,
-                    WebAppConfig.Default.MsaRedirectionTarget,
-                    WebAppConfig.Default.MsaClientScopes.Split(' '),
+                    SharedConfig.AppClientID,
+                    SharedConfig.RedirectUri,
+                    SharedConfig.Scopes,
                     account.RefreshToken);
 
             }
@@ -97,7 +97,7 @@ namespace PhotoOrganizerWeb.Controllers
         public static CookieHeaderValue CookieForAccount(Account account)
         {
             var nv = new NameValueCollection();
-            nv["id"] = null != account ? account.Id.Encrypt(WebAppConfig.Default.CookiePassword) : "";
+            nv["id"] = null != account ? account.Id.Encrypt(SharedConfig.CookieAuthPassword) : "";
 
             var cookie = new CookieHeaderValue("session", nv);
             cookie.Secure = true;
@@ -128,7 +128,7 @@ namespace PhotoOrganizerWeb.Controllers
 
             if (null != encryptedAccountId)
             {
-                accountId = encryptedAccountId.Decrypt(WebAppConfig.Default.CookiePassword);
+                accountId = encryptedAccountId.Decrypt(SharedConfig.CookieAuthPassword);
             }
 
             if (null != accountId)

@@ -15,11 +15,14 @@ namespace PhotoOrganizerWebJob
         static void Main()
         {
             // Init the shared configuration object
-            Console.WriteLine("OneDrive URL: " + WebJobConfig.Default.OneDriveBaseUrl);
+            Console.WriteLine("PhotoOrganizerWebJob started. Initializing Azure connection.");
 
-            PhotoOrganizerShared.AzureStorage.InitializeConnections(WebJobConfig.Default);
+            PhotoOrganizerShared.AzureStorage.InitializeConnections();
 
             var host = new JobHost();
+
+            Console.WriteLine("WebJob is running.");
+
             // The following code ensures that the WebJob will be running continuously
             host.RunAndBlock();
         }

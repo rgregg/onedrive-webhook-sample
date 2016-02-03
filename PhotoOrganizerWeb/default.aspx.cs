@@ -48,11 +48,11 @@ namespace PhotoOrganizerWeb
         private void GenerateSignInLink()
         {
             QueryStringBuilder qsb = new QueryStringBuilder();
-            qsb.Add("client_id", WebAppConfig.Default.MsaClientId);
-            qsb.Add("scope", WebAppConfig.Default.MsaClientScopes);
+            qsb.Add("client_id", SharedConfig.AppClientID);
+            qsb.Add("scope", SharedConfig.OAuthScopes());
             qsb.Add("response_type", "code");
-            qsb.Add("redirect_uri", WebAppConfig.Default.MsaRedirectionTarget);
-            linkToSignIn.NavigateUrl = WebAppConfig.Default.MsaAuthorizationService + qsb.ToString();
+            qsb.Add("redirect_uri", SharedConfig.RedirectUri);
+            linkToSignIn.NavigateUrl = SharedConfig.AuthorizationService + qsb.ToString();
         }
 
         protected async void buttonSaveChanges_Click(object sender, EventArgs e)
