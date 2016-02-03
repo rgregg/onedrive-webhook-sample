@@ -24,32 +24,35 @@
         /// <returns></returns>
         public static async Task ProcessQueueMessageAsync([QueueTrigger("subscriptions")] string message, TextWriter log)
         {
-            log.WriteLine(message);
+            WebJobLogger logger = new WebJobLogger(log);
+
+            logger.WriteLog("Received queue message: {0}", message);
 
             var elements = HttpUtility.ParseQueryString(message);
             string userId = elements["id"];
             if (string.IsNullOrEmpty(userId))
             {
-                await log.WriteLineAsync("Null or empty 'id' property");
+                logger.WriteLog("User ID was null or empty. Message ignored.");
                 return;
             }
 
-            await log.WriteFormattedLineAsync("Processing webhook for user: {0}", userId);
-
             var account = await AzureStorage.LookupAccountAsync(userId);
+            logger.Account = account;
+            
             if (null == account)
             {
-                await log.WriteFormattedLineAsync("Unable to locate account for id: {0}", userId);
+                logger.WriteLog("Unable to locate account for id: {0}. Message skipped", userId);
                 return;
             }
 
             try
             {
-                await WebhookActionForAccountAsync(account, log);
+                logger.WriteLog("Processing changes for user id: {0}", userId);
+                await WebhookActionForAccountAsync(account, logger);
             }
             catch (Exception ex)
             {
-                log.WriteFormattedLine("Error while running job for account {0}: {1}", account.Id, ex);
+                logger.WriteLog("Error while running job for user id '{0}'. Message skipped.\r\n{1}", userId, ex);
             }
         }
 
@@ -60,32 +63,26 @@
         /// <param name="account"></param>
         /// <param name="log"></param>
         /// <returns></returns>
-        public static async Task SubscribeToWebhooksForAccount(Account account, TextWriter log)
+        public static async Task SubscribeToWebhooksForAccount(Account account, WebJobLogger log)
         {
             try
             {
-                await AzureStorage.InsertActivityAsync(
-                    new Activity
-                    {
-                        UserId = account.Id,
-                        Type = Activity.ActivityEventCode.CreatingSubscription,
-                        Message = "Creating subscription on OneDrive"
-                    });
+                log.WriteLog(ActivityEventCode.CreatingSubscription, "Creating subscription on OneDrive service.");
 
-                await log.WriteFormattedLineAsync("Connecting to OneDrive...");
+                log.WriteLog("Connecting to OneDrive...");
 
                 // Build a new OneDriveClient with the account information
                 var client = await SharedConfig.GetOneDriveClientForAccountAsync(account);
 
-                await CreateNewSubscriptionAsync(account, client);
+                await CreateNewSubscriptionAsync(account, client, log);
 
                 account.WebhooksReceived += 1;
                 await AzureStorage.UpdateAccountAsync(account);
-                await log.WriteFormattedLineAsync("Updated account {0} with hooks received: {1}", account.Id, account.WebhooksReceived);
+                log.WriteLog("Updated account {0} with hooks received: {1}", account.Id, account.WebhooksReceived);
             }
             catch (Exception ex)
             {
-                log.WriteFormattedLine("Exception: {0}", ex);
+                log.WriteLog("Exception: {0}", ex);
             }
             finally
             {
@@ -93,23 +90,43 @@
             }
         }
 
-        private static async Task CreateNewSubscriptionAsync(Account account, IOneDriveClient client)
+        /// <summary>
+        /// Create a new notification subscription with the service.
+        /// </summary>
+        /// <param name="account"></param>
+        /// <param name="client"></param>
+        /// <param name="log"></param>
+        /// <returns></returns>
+        private static async Task CreateNewSubscriptionAsync(Account account, IOneDriveClient client, WebJobLogger log)
         {
+            log.WriteLog("Creating subscription for account");
+
             // Make a request to create a new subscription
             OneDriveSubscription postSub = CreateSubscription(account);
             try
             {
                 var result = await client.SendRequestAsync<OneDriveSubscription>("POST", "/special/cameraroll/subscriptions", postSub);
                 account.SubscriptionIdentifier = result.Id;
+                log.WriteLog("Subscription created. ID: {0}. Expiration: {1}", result.Id, result.ExpirationDateTime);
             }
             catch (Exception ex)
             {
+                log.WriteLog("Error creating subscription: {0}", ex);
                 // TODO: Handle errors when creating subscriptions
             }
         }
 
-        private static async Task UpdateExistingSubscriptionAsync(Account account, IOneDriveClient client)
+        /// <summary>
+        /// PATCH an existing subscription on the service to extend the expiration time.
+        /// </summary>
+        /// <param name="account"></param>
+        /// <param name="client"></param>
+        /// <param name="log"></param>
+        /// <returns></returns>
+        private static async Task UpdateExistingSubscriptionAsync(Account account, IOneDriveClient client, WebJobLogger log)
         {
+            log.WriteLog("Updating existing subscription");
+
             // Make a request to create a new subscription
             string queryUrl = "/special/cameraroll/subscriptions/" + account.SubscriptionIdentifier;
             OneDriveSubscription postSub = CreateSubscription(account);
@@ -118,13 +135,20 @@
             {
                 var result = await client.SendRequestAsync<OneDriveSubscription>("PATCH", queryUrl, postSub);
                 account.SubscriptionIdentifier = result.Id;
+                log.WriteLog("Subscription updated. ID: {0}. Expiration: {1}", result.Id, result.ExpirationDateTime);
             }
             catch (Exception ex)
             {
+                log.WriteLog("Error updating subscription: {0}", ex);
                 // TODO: Handle the case where the existing subscription actually doesn't exist any more.
             }
         }
 
+        /// <summary>
+        /// Generate a subscription object for the camera roll with an expiration of 180 days.
+        /// </summary>
+        /// <param name="account"></param>
+        /// <returns></returns>
         private static OneDriveSubscription CreateSubscription(Account account)
         {
             return new OneDriveSubscription
@@ -137,7 +161,7 @@
             };
         }
 
-        public static async Task WebhookActionForAccountAsync(Account account, TextWriter log)
+        public static async Task WebhookActionForAccountAsync(Account account, WebJobLogger log)
         {
             // Acquire a simple lock to ensure that only one thread is processing 
             // an account at the same time to avoid concurrency issues.
@@ -152,11 +176,11 @@
                         new Activity
                         {
                             UserId = account.Id,
-                            Type = Activity.ActivityEventCode.LookingForChanges,
+                            Type = ActivityEventCode.LookingForChanges,
                             Message = "Account lock acquired"
                         });
                     
-                    await log.WriteFormattedLineAsync("Connecting to OneDrive...");
+                    log.WriteLog("Connecting to OneDrive...");
 
                     // Build a new OneDriveClient with the account information
                     var client = await SharedConfig.GetOneDriveClientForAccountAsync(account);
@@ -166,34 +190,27 @@
                     var countOfItems = await organizer.OrganizeSourceFolderItemChangesAsync();
 
                     // Record the account activity
-                    await AzureStorage.InsertActivityAsync(
-                        new Activity
-                        {
-                            UserId = account.Id,
-                            Type = Activity.ActivityEventCode.AccountProcessed,
-                            Message = "Account organization complete.",
-                            WorkItemCount =  countOfItems
-                        });
+                    log.WriteLog(ActivityEventCode.AccountProcessed, "Account organization complete. Moved items: {0}", countOfItems);
 
                     // Record that we received another webhook and save the account back to table storage
                     account.WebhooksReceived += 1;
                     await AzureStorage.UpdateAccountAsync(account);
-                    await log.WriteFormattedLineAsync("Updated account {0} with hooks received: {1}", account.Id, account.WebhooksReceived);
+                    log.WriteLog("Updated account {0} with hooks received: {1}", account.Id, account.WebhooksReceived);
                 }
                 catch (Exception ex)
                 {
-                    log.WriteFormattedLine("Exception: {0}", ex);
+                    log.WriteLog("Exception: {0}", ex);
                 }
                 finally
                 {
                     AccountLocker.ReleaseLock(account.Id);
                 }
 
-                await log.WriteFormattedLineAsync("Processing completed for account: {0}", account.Id);
+                log.WriteLog("Processing completed for account: {0}", account.Id);
             }
             else
             {
-                await log.WriteFormattedLineAsync("Failed to acquire lock for account. Another thread is already processing updates for this account.");
+                log.WriteLog("Failed to acquire lock for account. Another thread is already processing updates for this account.");
             }
 
         }

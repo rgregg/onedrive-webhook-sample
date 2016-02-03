@@ -70,8 +70,15 @@ namespace PhotoOrganizerShared
 
         public static async Task InsertActivityAsync(Activity activity)
         {
-            TableOperation insertOperation = TableOperation.Insert(activity);
-            await ActivityTable.ExecuteAsync(insertOperation);
+            try
+            {
+                TableOperation insertOperation = TableOperation.Insert(activity);
+                await ActivityTable.ExecuteAsync(insertOperation);
+            }
+            catch
+            {
+                // Ignore errors here, since we're just logging activity.
+            }
         }
 
         public static async Task<List<Activity>> RecentActivityAsync(string userId)

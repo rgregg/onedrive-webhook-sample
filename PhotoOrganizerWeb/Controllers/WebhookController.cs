@@ -30,7 +30,7 @@ namespace PhotoOrganizerWeb.Controllers
                             new Activity
                             {
                                 UserId = notification.UserId,
-                                Type = Activity.ActivityEventCode.WebhookReceived,
+                                Type = ActivityEventCode.WebhookReceived,
                                 Message = Newtonsoft.Json.JsonConvert.SerializeObject(notification)
                             });
 

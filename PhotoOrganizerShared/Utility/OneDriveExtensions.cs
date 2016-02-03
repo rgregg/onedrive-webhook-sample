@@ -12,7 +12,8 @@ namespace PhotoOrganizerShared.Utility
 
         public static async Task<T> SendRequestAsync<T>(this IOneDriveClient client, string httpMethod, string requestUrl, object requestBody = null)
         {
-            BaseRequest request = new BaseRequest(requestUrl, client);
+            Uri requestUri = new Uri(new Uri(client.BaseUrl), requestUrl);
+            BaseRequest request = new BaseRequest(requestUri.AbsoluteUri, client);
             request.Method = httpMethod;
             if (requestBody != null)
                 request.ContentType = "application/json";

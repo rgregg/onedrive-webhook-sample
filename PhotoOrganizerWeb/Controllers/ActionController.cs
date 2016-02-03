@@ -41,7 +41,7 @@ namespace PhotoOrganizerWeb.Controllers
                 new Activity
                 {
                     UserId = account.Id,
-                    Type = Activity.ActivityEventCode.FileChanged,
+                    Type = ActivityEventCode.FileChanged,
                     Message = string.Format("Creating test file test_file.txt with resource id: {0}", item.Id)
                 });
 

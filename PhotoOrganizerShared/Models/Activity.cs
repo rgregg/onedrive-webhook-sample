@@ -54,15 +54,17 @@
 
         public long WorkItemCount { get; set; }
 
-        public enum ActivityEventCode
-        {
-            MessageLogged,
-            FileChanged,
-            WebhookReceived,
-            AccountProcessed,
-            LookingForChanges,
-            FileMoved,
-            CreatingSubscription
-        }
+
+    }
+
+    public enum ActivityEventCode
+    {
+        MessageLogged,
+        FileChanged,
+        WebhookReceived,
+        AccountProcessed,
+        LookingForChanges,
+        FileMoved,
+        CreatingSubscription
     }
 }
