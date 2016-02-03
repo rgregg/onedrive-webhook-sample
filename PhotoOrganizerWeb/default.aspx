@@ -8,7 +8,7 @@
     <link href="styles.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://appsforoffice.microsoft.com/fabric/1.0/fabric.min.css" />
     <link rel="stylesheet" href="https://appsforoffice.microsoft.com/fabric/1.0/fabric.components.min.css" />
-    <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-2.1.4.min.js" type="text/javascript"></script>
+    <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-2.1.4.min.js" type="text/javascript"></script>
 </head>
 <body>
     <form id="form1" runat="server">
