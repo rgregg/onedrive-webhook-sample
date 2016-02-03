@@ -53,25 +53,88 @@
             }
         }
 
-        internal static async Task<IOneDriveClient> CreateOneDriveClientAsync(Account account)
+        /// <summary>
+        /// Ensure that we have a valid subscription to receive webhooks for the target folder 
+        /// on this account.
+        /// </summary>
+        /// <param name="account"></param>
+        /// <param name="log"></param>
+        /// <returns></returns>
+        public static async Task SubscribeToWebhooksForAccount(Account account, TextWriter log)
         {
             try
             {
-                return await OneDriveClient.GetSilentlyAuthenticatedMicrosoftAccountClient(
-                    SharedConfig.AppClientID,
-                    SharedConfig.RedirectUri,
-                    SharedConfig.Scopes,
-                    account.RefreshToken);
+                await AzureStorage.InsertActivityAsync(
+                    new Activity
+                    {
+                        UserId = account.Id,
+                        Type = Activity.ActivityEventCode.CreatingSubscription,
+                        Message = "Creating subscription on OneDrive"
+                    });
 
+                await log.WriteFormattedLineAsync("Connecting to OneDrive...");
+
+                // Build a new OneDriveClient with the account information
+                var client = await SharedConfig.GetOneDriveClientForAccountAsync(account);
+
+                await CreateNewSubscriptionAsync(account, client);
+
+                account.WebhooksReceived += 1;
+                await AzureStorage.UpdateAccountAsync(account);
+                await log.WriteFormattedLineAsync("Updated account {0} with hooks received: {1}", account.Id, account.WebhooksReceived);
             }
-            catch (OneDriveException ex)
+            catch (Exception ex)
             {
-                if (ex.IsMatch(OneDriveErrorCode.AuthenticationFailure.ToString()))
-                {
-                    // This refresh token is no longer valid, the user needs to log in again.
-                }
+                log.WriteFormattedLine("Exception: {0}", ex);
             }
-            return null;
+            finally
+            {
+                AccountLocker.ReleaseLock(account.Id);
+            }
+        }
+
+        private static async Task CreateNewSubscriptionAsync(Account account, IOneDriveClient client)
+        {
+            // Make a request to create a new subscription
+            OneDriveSubscription postSub = CreateSubscription(account);
+            try
+            {
+                var result = await client.SendRequestAsync<OneDriveSubscription>("POST", "/special/cameraroll/subscriptions", postSub);
+                account.SubscriptionIdentifier = result.Id;
+            }
+            catch (Exception ex)
+            {
+                // TODO: Handle errors when creating subscriptions
+            }
+        }
+
+        private static async Task UpdateExistingSubscriptionAsync(Account account, IOneDriveClient client)
+        {
+            // Make a request to create a new subscription
+            string queryUrl = "/special/cameraroll/subscriptions/" + account.SubscriptionIdentifier;
+            OneDriveSubscription postSub = CreateSubscription(account);
+
+            try
+            {
+                var result = await client.SendRequestAsync<OneDriveSubscription>("PATCH", queryUrl, postSub);
+                account.SubscriptionIdentifier = result.Id;
+            }
+            catch (Exception ex)
+            {
+                // TODO: Handle the case where the existing subscription actually doesn't exist any more.
+            }
+        }
+
+        private static OneDriveSubscription CreateSubscription(Account account)
+        {
+            return new OneDriveSubscription
+            {
+                Resource = "/drive/special/cameraroll",
+                NotificationType = "webhook",
+                NotificationUrl = SharedConfig.AppBaseUrl + "/api/webhook",
+                Context = account.Id,
+                ExpirationDateTime = DateTimeOffset.UtcNow.AddDays(180)
+            };
         }
 
         public static async Task WebhookActionForAccountAsync(Account account, TextWriter log)
@@ -96,7 +159,7 @@
                     await log.WriteFormattedLineAsync("Connecting to OneDrive...");
 
                     // Build a new OneDriveClient with the account information
-                    var client = await CreateOneDriveClientAsync(account);
+                    var client = await SharedConfig.GetOneDriveClientForAccountAsync(account);
 
                     // Execute our organization class
                     FolderOrganizer organizer = new FolderOrganizer(client, account, log);

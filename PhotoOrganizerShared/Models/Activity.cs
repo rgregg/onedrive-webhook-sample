@@ -61,7 +61,8 @@
             WebhookReceived,
             AccountProcessed,
             LookingForChanges,
-            FileMoved
+            FileMoved,
+            CreatingSubscription
         }
     }
 }

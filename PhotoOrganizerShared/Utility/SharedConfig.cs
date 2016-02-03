@@ -1,9 +1,15 @@
-﻿using System.Text;
+﻿using System;
+using System.Text;
+using System.Threading.Tasks;
+using Microsoft.OneDrive.Sdk;
+using PhotoOrganizerShared.Models;
 
 namespace PhotoOrganizerShared.Utility
 {
     public static class SharedConfig
     {
+        public static string AppBaseUrl { get { return "https://camerarollorganizer.azurewebsites.net"; } }
+
         public static string AppClientID
         {
             get { return "0000000048159D5E"; }
@@ -66,5 +72,47 @@ namespace PhotoOrganizerShared.Utility
             return new OAuthHelper(TokenService, AppClientID, AppClientSecret, RedirectUri);
         }
 
+        public static async Task<IOneDriveClient> GetOneDriveClientForAccountAsync(Account account)
+        {
+            try
+            {
+                return await OneDriveClient.GetSilentlyAuthenticatedMicrosoftAccountClient(AppClientID, RedirectUri, Scopes, AppClientSecret, account.RefreshToken);
+            }
+            catch (OneDriveException ex)
+            {
+                System.Diagnostics.Debug.WriteLine(ex.ToString());
+            }
+            return null;
+        }
+
+
+        private class ODAuthProvider : IAuthenticationProvider
+        {
+            private readonly Account sourceAccount;
+
+            public ODAuthProvider(Account account)
+            {
+                this.sourceAccount = account;
+                this.CurrentAccountSession = new AccountSession();
+            }
+
+            public AccountSession CurrentAccountSession { get; set; }
+
+            public async Task AppendAuthHeaderAsync(System.Net.Http.HttpRequestMessage request)
+            {
+                string accessToken = await sourceAccount.AuthenticateAsync();
+                request.Headers.Add("Authorization", "Bearer " + accessToken);
+            }
+
+            public async Task<AccountSession> AuthenticateAsync()
+            {
+                return this.CurrentAccountSession;
+            }
+
+            public Task SignOutAsync()
+            {
+                throw new NotImplementedException();
+            }
+        }
     }
 }

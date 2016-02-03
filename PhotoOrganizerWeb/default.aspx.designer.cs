@@ -28,7 +28,7 @@ namespace PhotoOrganizerWeb {
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Panel panelNoCurrentUser;
+        protected global::System.Web.UI.HtmlControls.HtmlGenericControl panelNoCurrentUser;
         
         /// <summary>
         /// linkToSignIn control.
@@ -46,16 +46,7 @@ namespace PhotoOrganizerWeb {
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Panel panelLoggedIn;
-        
-        /// <summary>
-        /// labelAccountDisplayName control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Label labelAccountDisplayName;
+        protected global::System.Web.UI.HtmlControls.HtmlGenericControl panelLoggedIn;
         
         /// <summary>
         /// textBoxFolderFormatString control.
@@ -64,7 +55,7 @@ namespace PhotoOrganizerWeb {
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox textBoxFolderFormatString;
+        protected global::System.Web.UI.HtmlControls.HtmlInputText textBoxFolderFormatString;
         
         /// <summary>
         /// checkBoxEnableAccount control.
@@ -73,7 +64,7 @@ namespace PhotoOrganizerWeb {
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.CheckBox checkBoxEnableAccount;
+        protected global::System.Web.UI.HtmlControls.HtmlInputCheckBox checkBoxEnableAccount;
         
         /// <summary>
         /// buttonSaveChanges control.

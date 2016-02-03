@@ -90,6 +90,8 @@ namespace PhotoOrganizerShared.Models
             set { CachedAccessToken = value; } 
         }
 
+        public string SubscriptionIdentifier { get; set; }
+
         public void SetTokenResponse(OAuthToken token)
         {
             CachedAccessToken = token.AccessToken;

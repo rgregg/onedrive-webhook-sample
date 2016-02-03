@@ -35,11 +35,10 @@ namespace PhotoOrganizerWeb
                 {
                     panelLoggedIn.Visible = true;
                     panelNoCurrentUser.Visible = false;
-
-                    labelAccountDisplayName.Text = account.DisplayName;
+                    
                     labelPhotosOrganizedCount.Text = account.PhotosOrganized.ToString();
                     labelWebhooksReceived.Text = account.WebhooksReceived.ToString();
-                    textBoxFolderFormatString.Text = account.SubfolderFormat;
+                    textBoxFolderFormatString.Value = account.SubfolderFormat;
                     checkBoxEnableAccount.Checked = account.Enabled;
                 }
             }
@@ -63,7 +62,7 @@ namespace PhotoOrganizerWeb
                 bool validFormatString;
                 try
                 {
-                    string.Format(textBoxFolderFormatString.Text, DateTimeOffset.Now);
+                    string.Format(textBoxFolderFormatString.Value, DateTimeOffset.Now);
                     labelErrors.Text = "";
                     validFormatString = true;
                 }
@@ -74,7 +73,7 @@ namespace PhotoOrganizerWeb
                 }
 
                 if (validFormatString)
-                    updateAccount.SubfolderFormat = textBoxFolderFormatString.Text;
+                    updateAccount.SubfolderFormat = textBoxFolderFormatString.Value;
 
                 updateAccount.Enabled = checkBoxEnableAccount.Checked;
                 await AzureStorage.UpdateAccountAsync(updateAccount);

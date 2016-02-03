@@ -34,8 +34,7 @@ namespace PhotoOrganizerWeb.Controllers
                 return JsonResponseEx.Create(HttpStatusCode.Unauthorized, new { message = "Failed to locate an account for the auth cookie." });
             }
 
-
-            var client = await AuthorizationController.CreateOneDriveClientAsync(account);
+            var client = await SharedConfig.GetOneDriveClientForAccountAsync(account);
             var item = await client.Drive.Special[account.SourceFolder].ItemWithPath("test_file.txt").Content.Request().PutAsync<Item>(this.TestFileStream());
 
             await AzureStorage.InsertActivityAsync(
@@ -45,11 +44,39 @@ namespace PhotoOrganizerWeb.Controllers
                     Type = Activity.ActivityEventCode.FileChanged,
                     Message = string.Format("Creating test file test_file.txt with resource id: {0}", item.Id)
                 });
-            
+
             return JsonResponseEx.Create(HttpStatusCode.OK, item);
         }
 
+        [HttpGet, Route("api/stats")]
+        public async Task<IHttpActionResult> FetchStatisticsAsync()
+        {
+            var cookies = Request.Headers.GetCookies("session").FirstOrDefault();
+            if (cookies == null)
+            {
+                return JsonResponseEx.Create(HttpStatusCode.Unauthorized, new { message = "Session cookie is missing." });
+            }
+            var sessionCookieValue = cookies["session"].Values;
+            var account = await AuthorizationController.AccountFromCookie(sessionCookieValue, false);
+            if (null == account)
+            {
+                return JsonResponseEx.Create(HttpStatusCode.Unauthorized, new { message = "Failed to locate an account for the auth cookie." });
+            }
 
+            var client = await SharedConfig.GetOneDriveClientForAccountAsync(account);
+            var cameraRollFolder = await client.Drive.Special["cameraroll"].Request().GetAsync();
+
+
+            var responseObj = new
+            {
+                itemCount = cameraRollFolder.Folder.ChildCount,
+                totalSize = cameraRollFolder.Size,
+                lastModified = cameraRollFolder.LastModifiedDateTime
+            };
+
+            return JsonResponseEx.Create(HttpStatusCode.OK, responseObj);
+            
+        }
 
 
         internal static PhotoOrganizerShared.Models.OneDriveWebhook LastWebhookReceived { get; set; }

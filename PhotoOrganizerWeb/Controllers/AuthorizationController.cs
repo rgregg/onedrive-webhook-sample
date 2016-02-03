@@ -39,7 +39,7 @@ namespace PhotoOrganizerWeb.Controllers
             }
 
             Account account = new Account(token);
-            var client = await CreateOneDriveClientAsync(account);
+            var client = await SharedConfig.GetOneDriveClientForAccountAsync(account);
             var rootDrive = await client.Drive.Request().GetAsync();
 
             account.Id = rootDrive.Id;
@@ -62,28 +62,6 @@ namespace PhotoOrganizerWeb.Controllers
             return RedirectResponse.Create("/default.aspx", authCookie);
         }
 
-        internal static async Task<IOneDriveClient> CreateOneDriveClientAsync(Account account)
-        {
-            try
-            {
-                return await OneDriveClient.GetSilentlyAuthenticatedMicrosoftAccountClient(
-                    SharedConfig.AppClientID,
-                    SharedConfig.RedirectUri,
-                    SharedConfig.Scopes,
-                    account.RefreshToken);
-
-            }
-            catch (OneDriveException ex)
-            {
-                if (ex.IsMatch(OneDriveErrorCode.AuthenticationFailure.ToString()))
-                {
-                    // This refresh token is no longer valid, the user needs to log in again.
-                }
-            }
-            return null;
-        }
-
-
         [HttpGet, Route("signout")]
         public HttpResponseMessage SignOut()
         {
@@ -100,7 +78,9 @@ namespace PhotoOrganizerWeb.Controllers
             nv["id"] = null != account ? account.Id.Encrypt(SharedConfig.CookieAuthPassword) : "";
 
             var cookie = new CookieHeaderValue("session", nv);
+#if !DEBUG
             cookie.Secure = true;
+#endif
             cookie.HttpOnly = true;
             cookie.Expires = null != account ? DateTimeOffset.Now.AddMinutes(120) : DateTimeOffset.Now;
             cookie.Path = "/";
