@@ -35,10 +35,7 @@ namespace PhotoOrganizerWeb.Controllers
             }
 
 
-            
-            IWebUi foo2 = null;
-
-            OneDriveClient client = new OneDriveClient(WebAppConfig.Default.OneDriveBaseUrl, account, new HttpProvider(new Serializer()));
+            var client = await AuthorizationController.CreateOneDriveClientAsync(account);
             var item = await client.Drive.Special[account.SourceFolder].ItemWithPath("test_file.txt").Content.Request().PutAsync<Item>(this.TestFileStream());
 
             await AzureStorage.InsertActivityAsync(
@@ -51,6 +48,9 @@ namespace PhotoOrganizerWeb.Controllers
             
             return JsonResponseEx.Create(HttpStatusCode.OK, item);
         }
+
+
+
 
         internal static PhotoOrganizerShared.Models.OneDriveWebhook LastWebhookReceived { get; set; }
 

@@ -60,7 +60,7 @@ namespace PhotoOrganizerShared.Models
 
         private DateTimeOffset? CachedAccessTokenExpiration { get; set; }
 
-        public async Task<string> Authenticate()
+        public async Task<string> AuthenticateAsync()
         {
             if (null != CachedAccessTokenExpiration && null != CachedAccessToken 
                 && CachedAccessTokenExpiration < DateTimeOffset.Now.AddMinutes(5))

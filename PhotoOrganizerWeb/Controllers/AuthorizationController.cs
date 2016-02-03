@@ -39,8 +39,7 @@ namespace PhotoOrganizerWeb.Controllers
             }
 
             Account account = new Account(token);
-            OneDriveClient client = new OneDriveClient(WebAppConfig.Default.OneDriveBaseUrl, account, new HttpProvider(new Serializer()));
-
+            var client = await CreateOneDriveClientAsync(account);
             var rootDrive = await client.Drive.Request().GetAsync();
 
             account.Id = rootDrive.Id;
@@ -61,6 +60,27 @@ namespace PhotoOrganizerWeb.Controllers
             var authCookie = CookieForAccount(existingAccount);
 
             return RedirectResponse.Create("/default.aspx", authCookie);
+        }
+
+        internal static async Task<IOneDriveClient> CreateOneDriveClientAsync(Account account)
+        {
+            try
+            {
+                return await OneDriveClient.GetSilentlyAuthenticatedMicrosoftAccountClient(
+                    WebAppConfig.Default.MsaClientId,
+                    WebAppConfig.Default.MsaRedirectionTarget,
+                    WebAppConfig.Default.MsaClientScopes.Split(' '),
+                    account.RefreshToken);
+
+            }
+            catch (OneDriveException ex)
+            {
+                if (ex.IsMatch(OneDriveErrorCode.AuthenticationFailure.ToString()))
+                {
+                    // This refresh token is no longer valid, the user needs to log in again.
+                }
+            }
+            return null;
         }
 
 

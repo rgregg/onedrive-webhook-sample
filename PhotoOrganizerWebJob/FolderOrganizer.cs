@@ -16,14 +16,14 @@ namespace PhotoOrganizerWebJob
     /// </summary>
     internal class FolderOrganizer
     {
-        private readonly OneDriveClient client;
+        private readonly IOneDriveClient client;
         private readonly Account account;
         private readonly TextWriter log;
         private readonly Dictionary<string, Item> cachedFolders = new Dictionary<string, Item>();
 
         private int itemsOrganized;
 
-        public FolderOrganizer(OneDriveClient client, Account account, TextWriter log)
+        public FolderOrganizer(IOneDriveClient client, Account account, TextWriter log)
         {
             this.client = client;
             this.account = account;

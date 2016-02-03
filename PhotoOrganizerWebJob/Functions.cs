@@ -53,6 +53,27 @@
             }
         }
 
+        internal static async Task<IOneDriveClient> CreateOneDriveClientAsync(Account account)
+        {
+            try
+            {
+                return await OneDriveClient.GetSilentlyAuthenticatedMicrosoftAccountClient(
+                    SharedConfig.Default.MsaClientId,
+                    SharedConfig.Default.MsaRedirectionTarget,
+                    SharedConfig.Default.MsaClientScopes.Split(' '),
+                    account.RefreshToken);
+
+            }
+            catch (OneDriveException ex)
+            {
+                if (ex.IsMatch(OneDriveErrorCode.AuthenticationFailure.ToString()))
+                {
+                    // This refresh token is no longer valid, the user needs to log in again.
+                }
+            }
+            return null;
+        }
+
         public static async Task WebhookActionForAccountAsync(Account account, TextWriter log)
         {
             // Acquire a simple lock to ensure that only one thread is processing 
@@ -73,10 +94,9 @@
                         });
                     
                     await log.WriteFormattedLineAsync("Connecting to OneDrive...");
-                    
+
                     // Build a new OneDriveClient with the account information
-                    OneDriveClient client = new OneDriveClient(SharedConfig.Default.OneDriveBaseUrl, account);
-                    var client = new OneDriveClient(
+                    var client = await CreateOneDriveClientAsync(account);
 
                     // Execute our organization class
                     FolderOrganizer organizer = new FolderOrganizer(client, account, log);
