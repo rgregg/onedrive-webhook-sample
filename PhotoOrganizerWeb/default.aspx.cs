@@ -77,6 +77,15 @@ namespace PhotoOrganizerWeb
 
                 updateAccount.Enabled = checkBoxEnableAccount.Checked;
                 await AzureStorage.UpdateAccountAsync(updateAccount);
+
+                if (updateAccount.Enabled == true || updateAccount.SyncToken == null)
+                {
+                    // Fake a webhook to kick off the organization process
+                    PhotoOrganizerShared.Models.OneDriveNotification notification = new PhotoOrganizerShared.Models.OneDriveNotification { UserId = account.Id };
+                    await AzureStorage.AddToPendingSubscriptionQueueAsync(notification);
+                }
+
+                
             }
         }
       
