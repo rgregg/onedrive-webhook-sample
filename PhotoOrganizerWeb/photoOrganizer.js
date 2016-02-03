@@ -15,6 +15,11 @@
         }
     });
 
+    refreshQueueDepth();
+
+});
+
+function refreshQueueDepth() {
     $.ajax("/api/queuedepth", {
         success: function (data, status, xhr) {
             $("#processingQueueDepth").text(data.depth);
@@ -23,7 +28,15 @@
             $("#processingQueueDepth").text("Error");
         }
     })
-});
+}
+
+function queueTestWebhook() {
+    $.ajax("api/action/testhook", {
+        success: function (data, status, xhr) {
+            refreshQueueDepth();
+        }
+    });
+}
 
 /**
  * Text Field Plugin

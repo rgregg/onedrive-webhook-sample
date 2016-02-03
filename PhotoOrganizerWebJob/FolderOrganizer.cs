@@ -31,7 +31,7 @@ namespace PhotoOrganizerWebJob
         }
 
         /// <summary>
-        /// Use the view.changes method to get a list of changes that should be processed
+        /// Use the view.delta method to get a list of changes that should be processed
         /// and organize those items accordingly into child folders.
         /// 
         /// Updates the Account provided to this instance and expects it to be persisted when
@@ -58,26 +58,20 @@ namespace PhotoOrganizerWebJob
             catch (OneDriveException ex)
             {
                 this.WriteLog("Error making first request to service: {0}", ex);
+                if (ex.IsMatchCode(OneDriveErrorCode.ResyncRequired))
+                {
+                    this.WriteLog("Resetting sync token and starting again.", ex);
+                    this.account.SyncToken = null;
+                    return await OrganizeSourceFolderItemChangesAsync();
+                }
                 return 0;
             }
 
             while (null != pagedResponse)
             {
-                // Check to see if we need to reset our sync token
-                if (null != pagedResponse.AdditionalData && pagedResponse.AdditionalData.ContainsKey("@changes.resync"))
-                {
-                    // Need to clear the sync token and start over again
-                    this.WriteLog("Service requests a resync. Need to restart with a null sync token: {0}", pagedResponse.AdditionalData["@changes.resync"]);
-                    this.account.SyncToken = null;
-                    return await this.OrganizeSourceFolderItemChangesAsync();
-                }
-                
-                if (null != pagedResponse.AdditionalData)
-                {
-                    // Save the current sync token for later
-                    this.account.SyncToken = pagedResponse.AdditionalData["@changes.token"] as string;
-                    this.WriteLog("Received new sync token: {0}", this.account.SyncToken);
-                }
+                // Save the current sync token for later
+                this.account.SyncToken = pagedResponse.Token;
+                this.WriteLog("Received new sync token: {0}", this.account.SyncToken);
 
                 this.WriteLog("Response page includes {0} items.", pagedResponse.CurrentPage.Count);
 
@@ -162,6 +156,7 @@ namespace PhotoOrganizerWebJob
             this.WriteLog("Moving items from the current page...");
             foreach (var item in items)
             {
+                Console.Write(".");
                 string skippedReason;
                 if (!this.ShouldMoveItem(item, sourceFolder, out skippedReason))
                 {
@@ -185,7 +180,7 @@ namespace PhotoOrganizerWebJob
                     try
                     {
                         this.WriteLog("Patching item {0} with parentReference.id = {1}", item.Name, destination.Id);
-                        var movedItem = await this.client.Drive.Items[item.Id].Request().UpdateAsync(patchedItemUpdate);
+                        var movedItem = await this.client.Drive.Items[item.Id].Request().Select("id").UpdateAsync(patchedItemUpdate);
                         ++this.itemsOrganized;
 
                         // Record the account activity

@@ -50,7 +50,8 @@
 
                 <div class="ms-Toggle ms-font-m">
                     <span class="ms-Toggle-description">Keep my camera roll organized</span>
-                    <input type="checkbox" id="checkBoxEnableAccount" class="ms-Toggle-input" runat="server" />                    <label for="checkBoxEnableAccount" class="ms-Toggle-field"><span class="ms-Label ms-Label--off">Off</span> <span class="ms-Label ms-Label--on">On</span></label>
+                    <input type="checkbox" id="checkBoxEnableAccount" class="ms-Toggle-input" runat="server" />
+                    <label for="checkBoxEnableAccount" class="ms-Toggle-field"><span class="ms-Label ms-Label--off">Off</span> <span class="ms-Label ms-Label--on">On</span></label>
                 </div>
 
                 <p class="ms-font-m"><asp:Button runat="server" ID="buttonSaveChanges" Text="Save" OnClick="buttonSaveChanges_Click" CssClass="ms-Button"></asp:Button></p>
@@ -67,6 +68,7 @@
                 <div class="ms-font-m">
                     <a href="/signout" class="ms-Button ms-Button--primary"><span class="ms-Button-label">Sign Out</span></a>
                     <a href="/api/action/activity" class="ms-Button ms-Button--primary"><span class="ms-Button-label">Activity Log</span></a>
+                    <button class="ms-Button ms-Button--primary" onclick="queueTestWebhook(); return false;"><span class="ms-Button-label">Generate test webhook</span></button>
                 </div>
             </div>
         </div>

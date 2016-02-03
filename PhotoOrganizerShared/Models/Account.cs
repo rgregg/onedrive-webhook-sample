@@ -25,10 +25,8 @@ namespace PhotoOrganizerShared.Models
         {
             this.Enabled = true;
             this.SubfolderFormat = DefaultSubfolderFormatString;
-            this.SourceFolder = "approot";
+            this.SourceFolder = "cameraroll";
         }
-
-
 
         public string Id 
         {

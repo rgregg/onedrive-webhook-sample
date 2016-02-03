@@ -113,11 +113,35 @@ namespace PhotoOrganizerWeb.Controllers
             return JsonResponseEx.Create(HttpStatusCode.OK, new { value = activity});
         }
 
+        [HttpGet, Route("api/action/testhook")]
+        public async Task<IHttpActionResult> CreateTestWebhook()
+        {
+            var cookies = Request.Headers.GetCookies("session").FirstOrDefault();
+            if (cookies == null)
+            {
+                return JsonResponseEx.Create(HttpStatusCode.Unauthorized, new { message = "Session cookie is missing." });
+            }
+            var sessionCookieValue = cookies["session"].Values;
+            var account = await AuthorizationController.AccountFromCookie(sessionCookieValue, false);
+            if (null == account)
+            {
+                return JsonResponseEx.Create(HttpStatusCode.Unauthorized, new { message = "Failed to locate an account for the auth cookie." });
+            }
+
+            OneDriveNotification notification = new OneDriveNotification { UserId = account.Id };
+            await AzureStorage.AddToPendingSubscriptionQueueAsync(notification);
+
+            return Ok();
+        }
+
+
         private Stream TestFileStream()
         {
             var bytes = System.Text.Encoding.UTF8.GetBytes("This is a dummy file that can be deleted");
             return new MemoryStream(bytes);            
         }
+
+
 
     }
 }
