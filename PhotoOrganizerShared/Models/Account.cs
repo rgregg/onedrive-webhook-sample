@@ -8,6 +8,7 @@ namespace PhotoOrganizerShared.Models
     public class Account : TableEntity
     {
         private const string DefaultSubfolderFormatString = "Years/{0:yyyy/MM - MMMM}";
+        private const string DefaultSpecialFolderIdentifier = "cameraroll";
 
         public Account()
         {
@@ -23,9 +24,9 @@ namespace PhotoOrganizerShared.Models
 
         private void SetDefaultPropertyValues()
         {
-            this.Enabled = true;
+            this.Enabled = false;
             this.SubfolderFormat = DefaultSubfolderFormatString;
-            this.SourceFolder = "cameraroll";
+            this.SourceFolder = DefaultSpecialFolderIdentifier;
         }
 
         public string Id 
