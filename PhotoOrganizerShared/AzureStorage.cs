@@ -54,9 +54,16 @@ namespace PhotoOrganizerShared
 
         public static async Task<Models.Account> LookupAccountAsync(string id)
         {
-            TableOperation retrieveOperation = TableOperation.Retrieve<Account>(id, id);
-            TableResult result = await AccountTable.ExecuteAsync(retrieveOperation);
-            return (Account)result.Result;
+            try
+            {
+                TableOperation retrieveOperation = TableOperation.Retrieve<Account>(id, id);
+                TableResult result = await AccountTable.ExecuteAsync(retrieveOperation);
+                return (Account)result.Result;
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         public static async Task UpdateAccountAsync(Models.Account account)
