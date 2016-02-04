@@ -107,13 +107,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="FolderOrganizer.cs" />
-    <Compile Include="KeyedLock.cs" />
-    <Compile Include="OneDriveExtensionMethods.cs" />
+    <Compile Include="Utility\KeyedLock.cs" />
+    <Compile Include="Utility\OneDriveExtensionMethods.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Functions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TextWriterExtensionMethods.cs" />
-    <Compile Include="WebJobLogger.cs" />
+    <Compile Include="Utility\TextWriterExtensionMethods.cs" />
+    <Compile Include="Utility\WebJobLogger.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config">
